@@ -1,3 +1,13 @@
+## Things to flesh out:
+
+1. Decide if we want to start right away with AWS as the DB (there is only a paid option for AWS) or if we want to use a free DB hosting stie (like supabase) to start
+2. Decide if we want to stay with postgres or use another rdbms
+3. Need to connect prisma to the DB that we choose
+
+## What's been done so far for setup:
+- ran `create-next-app`
+- ran `npm install prisma`
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
