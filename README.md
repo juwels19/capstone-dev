@@ -7,6 +7,7 @@
 ## What's been done so far for setup:
 - ran `create-next-app`
 - ran `npm install prisma`
+- added chakra-ui to the project
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
