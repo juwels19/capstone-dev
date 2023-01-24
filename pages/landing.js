@@ -13,7 +13,7 @@ export default function Landing() {
             <main>
                 <Card size="lg" colorScheme="gray" variant="filled">
                     <CardBody>
-                        <Text>
+                        <Text className="font-bold">
                             This is some sample text
                         </Text>
                     </CardBody>
