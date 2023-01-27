@@ -16,7 +16,7 @@ export default function Signup() {
                         </Heading>
                     </CardHeader>
                     <CardBody>
-                        <FormControl>
+                        <FormControl isRequired>
                             <FormLabel>
                                 Email
                             </FormLabel>

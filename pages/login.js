@@ -16,7 +16,7 @@ export default function Login() {
                         </Heading>
                     </CardHeader>
                     <CardBody>
-                        <FormControl>
+                        <FormControl isRequired>
                             <FormLabel>
                                 Email
                             </FormLabel>
