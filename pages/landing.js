@@ -1,4 +1,6 @@
 import { Button, ButtonGroup, Card, CardBody, CardFooter, Text } from "@chakra-ui/react";
+import Image from "next/image";
+import timelyLogo from "../public/timely_logo.png";
 import { useRouter } from 'next/router'
 
 export default function Landing() {
@@ -11,7 +13,8 @@ export default function Landing() {
                 <div className="flex h-screen justify-center items-center">
                     <Card size="lg" colorScheme="gray" variant="filled" align="center" justify="center">
                         <CardBody>
-                            <Text className="font-bold">
+                            <Image src={timelyLogo} alt="timely logo"/>
+                            <Text className="font-bold" mt="2%">
                                 Manage, understand, and improve your time management skills through self-monitoring
                             </Text>
                         </CardBody>
