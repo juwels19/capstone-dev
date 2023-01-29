@@ -19,7 +19,7 @@ export default function Tasklist() {
 
     function onModalClose() {
         toast({
-            position: "top-right",
+            position: "top-middle",
             title: "Task Created Successfully!",
             status: "success",
             duration: 3000,
