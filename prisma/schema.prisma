@@ -9,3 +9,72 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email String @unique
+  password String // This needs to be hashed passwords
+  firstName String
+  lastName String?
+  semesters Semester[]
+  courses Course[]
+  tasks Task[]
+  sessions Session[]
+}
+
+
+model Semester {
+  id Int @id @default(autoincrement())
+  semesterName String
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  numCourses Int?
+  numTasks Int?
+  numSessions Int?
+  totalTime Float?
+  courses Course[]
+}
+
+model Course {
+  id Int @id @default(autoincrement())
+  courseName String
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  semester Semester? @relation(fields: [semesterId], references: [id])
+  semesterId Int?
+  numTasks Int?
+  numSessions Int?
+  totalTime Float?
+  tasks Task[]
+}
+
+model Task {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  course Course @relation(fields: [courseId], references: [id])
+  courseId Int
+  taskName String
+  dueDate DateTime
+  effortRating Int
+  completionTimeEstimate Float
+  completionTimeCurrent Float?
+  completionTimeFinal Float?
+  numSessions Int?
+  avgSessionTime Float?
+  sessions Session[]
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+  task Task @relation(fields: [taskId], references: [id])
+  taskId Int
+  startDateTime DateTime
+  endDateTime DateTime?
+  duration Float?
+  productivityRating Int?
+  notes String?
+}
