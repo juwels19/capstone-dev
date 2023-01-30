@@ -78,9 +78,7 @@ export default function Login() {
 
 
 export async function getServerSideProps(context) {
-    const session = await getSession(context);
-    console.log("session=getServerSideProps(context) in login: ", session)
-    
+    const session = await getSession(context);    
     if (session) {
         return {
             redirect: {

@@ -9,6 +9,8 @@ import {
     ModalCloseButton,
   } from '@chakra-ui/react';
 import { useToast } from "@chakra-ui/react";
+import { signOut } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import Task from "../src/components/Task";
 import taskData from "../src/mock_tasks.json";
 
@@ -29,18 +31,26 @@ export default function Tasklist() {
     }
 
     return (
-        <Box px="5%">
+        <Box px="5%">   
             <Flex pt="2%">
                 <Heading as="h1" size="2xl">
                     Task List
                 </Heading>
                 <Spacer/>
-                <Button rightIcon={<SmallAddIcon />}
-                        size="md" 
-                        colorScheme="teal"
-                        onClick={onOpen}>
-                    Create Task
-                </Button>
+                <ButtonGroup>
+                    <Button rightIcon={<SmallAddIcon />}
+                            size="md" 
+                            colorScheme="teal"
+                            onClick={onOpen}>
+                        Create Task
+                    </Button>
+                    <Button size="md"
+                            colorScheme="red"
+                            onClick={() => signOut({callbackUrl: "/landing"})}
+                            >
+                                Logout
+                    </Button>
+                </ButtonGroup>
             </Flex>
             <Modal size="2xl" isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
@@ -113,4 +123,26 @@ export default function Tasklist() {
             ))}
         </Box>
     );
+}
+
+
+export async function getServerSideProps(context) {
+    const session = await getSession(context);
+    console.log("session=getServerSideProps(context) in login: ", session)
+    
+    if (session) {
+        return {
+            redirect: {
+              destination: '/tasklist',
+              permanent: false,
+            },
+          };
+    }
+    return {
+        redirect: {
+            destination: "/login",
+            permanent: false
+        },
+        props: {}
+    };
 }
