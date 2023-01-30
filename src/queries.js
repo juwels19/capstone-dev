@@ -1,5 +1,6 @@
 const { PrismaClient }  = require("@prisma/client");
 
+// import prisma from prisma/index.ts
 const prisma = new PrismaClient();
 
 export async function queryTasks() {
