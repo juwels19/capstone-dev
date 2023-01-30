@@ -130,19 +130,16 @@ export async function getServerSideProps(context) {
     const session = await getSession(context);
     console.log("session=getServerSideProps(context) in login: ", session)
     
-    if (session) {
+    if (!session) {
         return {
             redirect: {
-              destination: '/tasklist',
-              permanent: false,
+                destination: "/login",
+                permanent: false
             },
+            props: {},
           };
     }
     return {
-        redirect: {
-            destination: "/login",
-            permanent: false
-        },
         props: {}
     };
 }
