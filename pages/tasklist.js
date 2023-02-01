@@ -39,24 +39,26 @@ export default function Tasklist(props) {
         {value: 5, label: "5 (8+ hours)"},
     ];
 
-    const handleCreateCourse = async (newCourseName, userId) => {
-        setIsLoading(true);
-        
+    const postCreateCourse = async (newCourseName, userId) => {
         let body = {
             courseName: newCourseName,
             userId: userId,
         }
+        //TODO add error handling here
+        await fetch("/api/courses/new", {method: "POST", body: JSON.stringify(body)})
+    }
 
-        let courseCreateRes = await fetch("/api/courses/new", {method: "POST", body: JSON.stringify(body)})
-        
-        if (courseCreateRes.ok) {
-            setCourseOptions((previousOptions) => [...previousOptions, {
-                label: newCourseName, 
-                value: newCourseName
-            }])
-            setCourseSelected(newCourseName)
-        }
+    const handleCreateCourse = async (newCourseName, userId) => {
+        setIsLoading(true);
+        //TODO add error handling here
+        await postCreateCourse(newCourseName, userId)
+        setCourseOptions((previousOptions) => [...previousOptions, {
+            label: newCourseName, 
+            value: newCourseName
+        }])
         setIsLoading(false);
+
+        setCourseSelected({label: newCourseName, value: newCourseName})
     }
     
     const handleCreateTaskSubmit = async (event) => {
@@ -203,7 +205,6 @@ export async function getServerSideProps(context) {
             label: course.courseName
         });
     }
-    console.log(courseNames)
 
     if (!session) {
         return {
