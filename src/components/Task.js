@@ -3,7 +3,6 @@ import tagData from "../mock_tags.json"
 
 export default function Task(props) {
     const task = props.task;
-    console.log("task component", task.id)
     return (
         <Box bg="gray.200" borderRadius="md" px="3%" py="2%" my="1%" key={`${task.id}-${task.userId}-${task.courseId}`}>
             <Flex>

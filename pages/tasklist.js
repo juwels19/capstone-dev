@@ -9,12 +9,12 @@ import {
     ModalCloseButton,
   } from '@chakra-ui/react';
 import { useToast } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { getSession } from "next-auth/react";
 import { Select, CreatableSelect } from "chakra-react-select";
 import Task from "../src/components/Task";
-import taskData from "../src/mock_tasks.json";
+import NoTasks from "@components/NoTasks";
 
 import prisma from "@prisma/index";
 
@@ -24,12 +24,20 @@ export default function Tasklist(props) {
     const toast = useToast();
 
     const [taskName, setTaskName] = useState("");
-    const [courseSelected, setCourseSelected] = useState("");
+    const [courseSelected, setCourseSelected] = useState(null);
     const [effort, setEffort] = useState(0);
     const [dueDate, setDueDate] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
+    const [tasks, setTasks] = useState(props.tasks)
+
+    useEffect(() => {
+        setTaskName("")
+        setEffort(0)
+        setDueDate("")
+        setCourseSelected(null)
+    }, [isOpen])
 
     const effortOptions = [
         {value: 1, label: "1 (0-2 hours)"},
@@ -51,29 +59,53 @@ export default function Tasklist(props) {
     const handleCreateCourse = async (newCourseName, userId) => {
         setIsLoading(true);
         //TODO add error handling here
-        await postCreateCourse(newCourseName, userId)
-        setCourseOptions((previousOptions) => [...previousOptions, {
-            label: newCourseName, 
+        const newCourse = {
+            label: newCourseName,
             value: newCourseName
-        }])
+        }
+        await postCreateCourse(newCourseName, userId)
+        setCourseOptions((previousOptions) => [...previousOptions, newCourse])
         setIsLoading(false);
 
-        setCourseSelected({label: newCourseName, value: newCourseName})
+        setCourseSelected(newCourse)
     }
     
     const handleCreateTaskSubmit = async (event) => {
         event.preventDefault();
+        if (taskName, effort, !isNaN(Date.parse(dueDate))) {
+            // Data is valid for task creation
+            let body = {
+                taskName: taskName,
+                courseName: courseSelected,
+                effort: effort,
+                dueDate: dueDate,
+                userId: props.userId
+            }
 
-        // // Toast depending on what happens
-        // toast({
-        //     position: "top-middle",
-        //     title: "Task Created Successfully!",
-        //     status: "success",
-        //     duration: 3000,
-        //     isClosable: true
-        // });
+            const newTaskRes = await fetch("/api/tasks/new", {method: "POST", body: JSON.stringify(body)})
+            let resBody = await newTaskRes.json()
 
-        onClose();
+            console.log(resBody)
+
+            setTasks((previousTasks) => [...previousTasks, resBody])
+            toast({
+                position: "top-right",
+                title: "Task Creation Successful!",
+                status: "success",
+                duration: 3000,
+                isClosable: true
+            });
+            onClose();
+        } else {
+            toast({
+                position: "top-middle",
+                title: "Task Creation Unsuccessful",
+                description: "Please make sure all required fields are entered.",
+                status: "error",
+                duration: 3000,
+                isClosable: true
+            });
+        }
     }
 
     return (
@@ -184,9 +216,10 @@ export default function Tasklist(props) {
                     Actual Time
                 </Text>
             </Flex>
-            {taskData.map((task) => (
-                <Task task={task} />
-            ))}
+            {tasks.length === 0 && <NoTasks />}
+            {tasks.length > 0 && tasks.map((task) => (
+                <Task task={task} />))}
+            
         </Box>
     );
 }
@@ -206,6 +239,10 @@ export async function getServerSideProps(context) {
         });
     }
 
+    // Get the tasks associated with this user
+    const tasks = await prisma.task.findMany({where: {userId: session.id}})
+    console.log(tasks)
+
     if (!session) {
         return {
             redirect: {
@@ -218,6 +255,7 @@ export async function getServerSideProps(context) {
     return {
         props: {
             courses: courseNames,
+            tasks: tasks,
             userId: session.id
         }
     };

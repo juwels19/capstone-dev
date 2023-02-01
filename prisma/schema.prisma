@@ -56,7 +56,7 @@ model Task {
   course Course? @relation(fields: [courseId], references: [id])
   courseId Int?
   taskName String
-  dueDate DateTime
+  dueDate String
   effortRating Int
   completionTimeEstimate Float?
   completionTimeCurrent Float?
