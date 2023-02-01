@@ -53,12 +53,12 @@ model Task {
   id Int @id @default(autoincrement())
   user User @relation(fields: [userId], references: [id])
   userId Int
-  course Course @relation(fields: [courseId], references: [id])
-  courseId Int
+  course Course? @relation(fields: [courseId], references: [id])
+  courseId Int?
   taskName String
   dueDate DateTime
   effortRating Int
-  completionTimeEstimate Float
+  completionTimeEstimate Float?
   completionTimeCurrent Float?
   completionTimeFinal Float?
   numSessions Int?
