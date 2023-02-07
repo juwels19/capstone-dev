@@ -110,12 +110,12 @@ export default function Tasklist(props) {
 
     return (
         <Box px="5%">   
-            <Flex pt="2%">
+            <Flex pt="5%">
                 <Heading as="h1" size="2xl">
-                    Task List
+                    {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}'s Task List
                 </Heading>
                 <Spacer/>
-                <ButtonGroup>
+                <ButtonGroup ml="2%">
                     <Button rightIcon={<SmallAddIcon />}
                             size="md" 
                             colorScheme="teal"
@@ -200,26 +200,25 @@ export default function Tasklist(props) {
                 </ModalContent>
             </Modal>
             <Flex pt="50px" minWidth="max-content">
-                <Text as="b">
-                    Tag
+                <Text as="b" ml="20%">
+                    Course
                 </Text>
-                <Text as="b">
+                <Text as="b" ml="5%">
                     Due Date
                 </Text>
-                <Text as="b">
+                <Text as="b" ml="5%">
                     Predicted Effort
                 </Text>
-                <Text as="b">
+                <Text as="b" ml="5%">
                     Estimated Time
                 </Text>
-                <Text as="b">
+                <Text as="b" ml="5%">
                     Actual Time
                 </Text>
             </Flex>
             {tasks.length === 0 && <NoTasks />}
             {tasks.length > 0 && tasks.map((task) => (
                 <Task task={task} />))}
-            
         </Box>
     );
 }
@@ -256,7 +255,8 @@ export async function getServerSideProps(context) {
         props: {
             courses: courseNames,
             tasks: tasks,
-            userId: session.id
+            userId: session.id,
+            userfirstName: session.firstName
         }
     };
 }
