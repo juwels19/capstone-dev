@@ -26,10 +26,10 @@ export default function Task(props) {
     const { isOpen: deleteTaskIsOpen, onOpen: deleteTaskOnOpen, onClose: deleteTaskOnClose } = useDisclosure();
     const { isOpen: editTaskIsOpen, onOpen: editTaskOnOpen, onClose: editTaskOnClose } = useDisclosure();
 
-    const [taskName, setTaskName] = useState("");
-    const [courseSelected, setCourseSelected] = useState(null);
-    const [effort, setEffort] = useState(0);
-    const [dueDate, setDueDate] = useState("");
+    const [taskName, setTaskName] = useState(task.taskName);
+    const [courseSelected, setCourseSelected] = useState({label: "test", value: "test"});
+    const [effort, setEffort] = useState(task.effortRating);
+    const [dueDate, setDueDate] = useState(task.dueDate);
     const [isLoading, setIsLoading] = useState(false);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
