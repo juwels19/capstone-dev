@@ -85,8 +85,6 @@ export default function Tasklist(props) {
             const newTaskRes = await fetch("/api/tasks/new", {method: "POST", body: JSON.stringify(body)})
             let resBody = await newTaskRes.json()
 
-            console.log(resBody)
-
             setTasks((previousTasks) => [...previousTasks, resBody])
             toast({
                 position: "top-right",
@@ -102,6 +100,22 @@ export default function Tasklist(props) {
                 title: "Task Creation Unsuccessful",
                 description: "Please make sure all required fields are entered.",
                 status: "error",
+                duration: 3000,
+                isClosable: true
+            });
+        }
+    }
+
+    const updateTasks = async () => {
+        const fetchRes = await fetch(`/api/tasks/fetch/${props.userId}`, {method: "GET"})
+
+        if (fetchRes.ok) {
+            const body = await fetchRes.json()
+            setTasks(body.body);
+            toast({
+                position: "top-right",
+                title: "Task Deletion Successful!",
+                status: "success",
                 duration: 3000,
                 isClosable: true
             });
@@ -218,7 +232,7 @@ export default function Tasklist(props) {
             </Flex>
             {tasks.length === 0 && <NoTasks />}
             {tasks.length > 0 && tasks.map((task) => (
-                <Task task={task} />))}
+                <Task task={task} updateTaskHandler={updateTasks}/>))}
         </Box>
     );
 }
