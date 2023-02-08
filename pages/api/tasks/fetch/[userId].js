@@ -12,7 +12,8 @@ async function handler(req, res) {
                         id: parseInt(userId)
                     }
                 }
-            }
+            },
+            include: {course: true}
         });
         res.status(201).json({ message: 'Task fetch complete', body: fetchRes, ...fetchRes});
     } else {

@@ -14,6 +14,7 @@ import { signOut } from "next-auth/react";
 import { getSession } from "next-auth/react";
 import { Select, CreatableSelect } from "chakra-react-select";
 import Task from "../src/components/Task";
+import Table from "@components/Table";
 import NoTasks from "@components/NoTasks";
 
 import prisma from "@prisma/index";
@@ -85,14 +86,7 @@ export default function Tasklist(props) {
             const newTaskRes = await fetch("/api/tasks/new", {method: "POST", body: JSON.stringify(body)})
             let resBody = await newTaskRes.json()
 
-            setTasks((previousTasks) => [...previousTasks, resBody])
-            toast({
-                position: "top-right",
-                title: "Task Creation Successful!",
-                status: "success",
-                duration: 3000,
-                isClosable: true
-            });
+            updateTasks("Creation")
             onClose();
         } else {
             toast({
@@ -106,7 +100,7 @@ export default function Tasklist(props) {
         }
     }
 
-    const updateTasks = async () => {
+    const updateTasks = async (event) => {
         const fetchRes = await fetch(`/api/tasks/fetch/${props.userId}`, {method: "GET"})
 
         if (fetchRes.ok) {
@@ -114,13 +108,135 @@ export default function Tasklist(props) {
             setTasks(body.body);
             toast({
                 position: "top-right",
-                title: "Task Deletion Successful!",
+                title: `Task ${event} Successful!`,
                 status: "success",
                 duration: 3000,
                 isClosable: true
             });
         }
     }
+
+    const COLUMNS = [
+        {
+            Header: 'Task',
+            accessor: 'taskName',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                        {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Course',
+            accessor: 'course.courseName',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                    {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Due Date',
+            accessor: 'dueDate',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                    {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Predicted Effort',
+            accessor: 'effortRating',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                    {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Estimated Time',
+            accessor: 'completionTimeEstimate',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                    {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Actual Time',
+            accessor: 'actual_time',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                    {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: '',
+            accessor: 'id',
+            width: 180,
+            minWidth: 180,
+            maxWidth: 180,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>
+                    {`${value}`}
+                    </Text>
+                </>
+                );
+            },
+        },
+    ]
 
     return (
         <Box px="5%">   
@@ -130,7 +246,7 @@ export default function Tasklist(props) {
                 </Heading>
                 <Spacer/>
                 <ButtonGroup ml="2%">
-                    <Button rightIcon={<SmallAddIcon />}
+                    <Button rightIcon={<SmallAddIcon boxSize="1.5em"/>}
                             size="md" 
                             colorScheme="teal"
                             onClick={onOpen}>
@@ -138,81 +254,80 @@ export default function Tasklist(props) {
                     </Button>
                     <Button size="md"
                             colorScheme="red"
-                            onClick={() => signOut({callbackUrl: "/landing"})}
+                            onClick={() => signOut({callbackUrl: "/"})}
                             >
                                 Logout
                     </Button>
                 </ButtonGroup>
             </Flex>
+
+
             <Modal size="2xl" isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader fontWeight="bold" fontSize="2xl">Create New Task</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <form method="POST"
-                              action="api/task/new"
-                              >
-                            <FormControl isRequired>
-                                <FormLabel fontWeight="bold">Task Name</FormLabel>
-                                <Input 
+                        <FormControl isRequired>
+                            <FormLabel fontWeight="bold">Task Name</FormLabel>
+                            <Input 
+                                width="100%" 
+                                variant="outline" 
+                                bg="white" 
+                                placeholder="Enter a task name"
+                                onChange={(e) => setTaskName(e.target.value)}
+                            />
+                        </ FormControl>
+                        <FormControl mt="2%">
+                            <FormLabel fontWeight="bold">Assign Course</FormLabel>
+                            <FormHelperText mb="1%">Assigning a course helps keep your tasks organized. We recommend assigning a course to a task.</FormHelperText>
+                            <CreatableSelect 
+                                placeholder="Select a course or type to create a new one..." 
+                                size="md"
+                                isClearable
+                                isDisabled={isLoading}
+                                isLoading={isLoading}
+                                options={courseOptions}
+                                onCreateOption={(value) => handleCreateCourse(value, props.userId)}
+                                onChange={(newValue) => setCourseSelected(newValue)}
+                                value={courseSelected}
+                            />
+                        </FormControl>
+                        <FormControl mt="2%" isRequired>
+                            <FormLabel fontWeight="bold">Effort</FormLabel>
+                            <FormHelperText mb="1%">To help you start estimating time and effort, select a range that you think fits best.</FormHelperText>
+                            <Select 
+                                placeholder="Select effort..." 
+                                size="md"
+                                options={effortOptions}
+                                onChange={(e) => setEffort(e.value)}
+                            />
+                        </FormControl>
+                        <FormControl mt="2%" isRequired>
+                            <FormLabel fontWeight="bold">Due Date</FormLabel>
+                            <Input 
+                                width="100%"
+                                variant="outline"
+                                bg="white"
+                                type="datetime-local"
+                                onChange={(e) => setDueDate(e.target.value)}
+                            />
+                        </FormControl>
+                        <ButtonGroup sz="md" mt="5%" minWidth="100%">
+                            <Button colorScheme="gray" onClick={onClose} width="100%">
+                                Cancel
+                            </Button>
+                            <Button colorScheme="green" 
                                     width="100%" 
-                                    variant="outline" 
-                                    bg="white" 
-                                    placeholder="Enter a task name"
-                                    onChange={(e) => setTaskName(e.target.value)}
-                                />
-                            </ FormControl>
-                            <FormControl mt="2%">
-                                <FormLabel fontWeight="bold">Assign Course</FormLabel>
-                                <FormHelperText mb="1%">Assigning a course helps keep your tasks organized. We recommend assigning a course to a task.</FormHelperText>
-                                <CreatableSelect 
-                                    placeholder="Select a course or type to create a new one..." 
-                                    size="md"
-                                    isClearable
-                                    isDisabled={isLoading}
-                                    isLoading={isLoading}
-                                    options={courseOptions}
-                                    onCreateOption={(value) => handleCreateCourse(value, props.userId)}
-                                    onChange={(newValue) => setCourseSelected(newValue)}
-                                    value={courseSelected}
-                                />
-                            </FormControl>
-                            <FormControl mt="2%" isRequired>
-                                <FormLabel fontWeight="bold">Effort</FormLabel>
-                                <FormHelperText mb="1%">To help you start estimating time and effort, select a range that you think fits best.</FormHelperText>
-                                <Select 
-                                    placeholder="Select effort..." 
-                                    size="md"
-                                    options={effortOptions}
-                                    onChange={(e) => setEffort(e.value)}
-                                />
-                            </FormControl>
-                            <FormControl mt="2%" isRequired>
-                                <FormLabel fontWeight="bold">Due Date</FormLabel>
-                                <Input 
-                                    width="100%"
-                                    variant="outline"
-                                    bg="white"
-                                    type="datetime-local"
-                                    onChange={(e) => setDueDate(e.target.value)}
-                                />
-                            </FormControl>
-                            <ButtonGroup sz="md" mt="5%" minWidth="100%">
-                                <Button colorScheme="gray" onClick={onClose} width="100%">
-                                    Cancel
-                                </Button>
-                                <Button colorScheme="green" 
-                                        width="100%" 
-                                        type="submit"
-                                        onClick={handleCreateTaskSubmit}>
-                                    Create Task
-                                </Button>
-                            </ButtonGroup>
-                        </form>
+                                    type="submit"
+                                    onClick={handleCreateTaskSubmit}>
+                                Create Task
+                            </Button>
+                        </ButtonGroup>
                     </ModalBody>
                 </ModalContent>
             </Modal>
+
             <Flex pt="50px" minWidth="max-content">
                 <Text as="b" ml="20%">
                     Course
@@ -232,7 +347,16 @@ export default function Tasklist(props) {
             </Flex>
             {tasks.length === 0 && <NoTasks />}
             {tasks.length > 0 && tasks.map((task) => (
-                <Task task={task} updateTaskHandler={updateTasks}/>))}
+                <Task 
+                    task={task} 
+                    updateTaskHandler={updateTasks}
+                    courseOptions={courseOptions}
+                    handleCreateCourse={handleCreateCourse}
+                />))}
+                <Table
+                    columns={COLUMNS}
+                    data = {tasks}
+                />
         </Box>
     );
 }
@@ -253,7 +377,7 @@ export async function getServerSideProps(context) {
     }
 
     // Get the tasks associated with this user
-    const tasks = await prisma.task.findMany({where: {userId: session.id}})
+    const tasks = await prisma.task.findMany({where: {userId: session.id}, include: {course: true}})
     console.log(tasks)
 
     if (!session) {
