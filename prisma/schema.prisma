@@ -72,9 +72,8 @@ model Session {
   userId Int
   task Task @relation(fields: [taskId], references: [id])
   taskId Int
-  startDateTime DateTime
-  endDateTime DateTime?
-  duration Float?
-  productivityRating Int?
+  startDateTime String
+  duration Int
+  productivityRating Int
   notes String?
 }
