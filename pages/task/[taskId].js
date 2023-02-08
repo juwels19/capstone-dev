@@ -61,9 +61,8 @@ export default function TaskDetails(props) {
             numSessions++;
             totalDuration += session.duration;
         }
-        console.log(totalDuration, numSessions)
         totalDuration = (totalDuration / 3600).toFixed(2);
-        let avgSessionTimeHours = ((totalDuration / numSessions) / 60).toFixed(2);
+        let avgSessionTimeHours = (totalDuration / numSessions).toFixed(2);
         setTotalSessionTime(totalDuration)
         setTotalSessions(numSessions)
         setAverageSessionTime(avgSessionTimeHours)
