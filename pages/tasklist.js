@@ -1,5 +1,5 @@
-import { SmallAddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Text, useDisclosure } from "@chakra-ui/react";
+import { SmallAddIcon, ChevronRightIcon, InfoIcon } from "@chakra-ui/icons";
+import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, HStack } from "@chakra-ui/react";
 import {
     Modal,
     ModalOverlay,
@@ -327,7 +327,7 @@ export default function Tasklist(props) {
         <Box px="5%">
             <Flex pt="5%">
                 <Heading as="h1" size="2xl">
-                    {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}'s Task List
+                    {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}&apos;s Task List
                 </Heading>
                 <Spacer/>
                 <ButtonGroup ml="2%">
@@ -378,7 +378,13 @@ export default function Tasklist(props) {
                             />
                         </FormControl>
                         <FormControl mt="2%" isRequired>
-                            <FormLabel fontWeight="bold">Effort</FormLabel>
+                            <HStack spacing={0.5}>
+                                <FormLabel fontWeight="bold">Effort</FormLabel>
+                                <Tooltip label="This is a test tooltip" >
+                                    <InfoIcon />
+                                </Tooltip>
+                            </HStack>
+                            
                             <FormHelperText mb="1%">To help you start estimating time and effort, select a range that you think fits best.</FormHelperText>
                             <Select 
                                 placeholder="Select effort..." 

@@ -83,7 +83,7 @@ export default function Login() {
                     </form>
                     <Box align="center" paddingTop="20px">
                         <Text fontSize="xs">
-                            Don't have an account?
+                            Don&apos;t have an account?
                         </Text>
                         <Link as={NextLink} href="/signup" fontSize="xs" color="blue.600">
                             SIGN UP HERE

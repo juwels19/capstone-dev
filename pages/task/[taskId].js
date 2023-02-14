@@ -15,7 +15,7 @@ import calculateDateDifference from "src/utils/dateCalc"
 
 import EditSessionModal from "@components/sessions/EditSessionModal";
 import DeleteSessionModal from "@components/sessions/DeleteSessionModal";   
-// import NoSessions from "@components/sessions/NoSessions";
+import NoSessions from "@components/sessions/NoSessions";
 
 import Table from "@components/Table";
 
@@ -447,7 +447,7 @@ export default function TaskDetails(props) {
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
             {
                 sessions.length === 0 
-                ? <NoTasks />
+                ? <NoSessions />
                 : (
                     <Box padding="3% 0 0 0">
                         <Table 
