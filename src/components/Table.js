@@ -64,7 +64,7 @@ export default function Table(props){
           </VStack>
         </Center>
       ) : (
-        <ChakraTable {...getTableProps()}>
+        <ChakraTable {...getTableProps()}  style={{borderCollapse:"separate", borderSpacing:"0 8px"}}>
           <Thead>
             {headerGroups.map(headerGroup => (
               <Tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
@@ -80,14 +80,16 @@ export default function Table(props){
                     _first={{textAlign: "left"}}
                   >
                     {column.render('Header')}
-                    {column.isSorted ? (
+
+                    {/* SORTING LOGIC BELOW */}
+                    {/* {column.isSorted ? (
                           column.isSortedDesc ? (
                             <ArrowDownIcon aria-label="sorted descending" />
                           ) : (
                             <ArrowUpIcon aria-label="sorted ascending" />
                           )
                         ) : null
-                    }
+                    } */}
                     {/* <Flex justify={"center"} >
                       <Box height="24px" display="inline">
                         {column.render('Header')}
@@ -113,6 +115,7 @@ export default function Table(props){
               return (
                 <Tr
                   {...row.getRowProps()}
+
                   key={row.id}
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                   cursor={onRowClick ? 'pointer' : undefined}
