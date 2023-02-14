@@ -15,16 +15,16 @@ import {
 import { FaTrash } from "react-icons/fa"
 
 export default function DeleteSessionModal(props) {
-    const {userId, sessionId} = props;
+    const {userId, sessionId, updateSessionHandler} = props;
 
     const { isOpen: deleteSessionIsOpen, onOpen: deleteSessionOnOpen, onClose: deleteSessionOnClose } = useDisclosure();
 
 
     const deleteSessionHandler = async () => {
         //TODO add error handling here
-        // const deleteRes = await fetch(`/api/sessions/${session.id}`, {method: "DELETE"})
+        await fetch(`/api/sessions/${sessionId}`, {method: "DELETE"})
         deleteSessionOnClose();
-        props.updateSessionHandler("Deletion");
+        updateSessionHandler("Deletion");
     }
 
     return (

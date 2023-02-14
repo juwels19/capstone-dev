@@ -157,11 +157,28 @@ export default function TaskDetails(props) {
     }
 
     const effortValueToLabel = {
-        1: "0-2 hours",
-        2: "2-4 hours",
-        3: "4-6 hours",
-        4: "6-8 hours",
-        5: "8+ hours",
+        1: "< 0.5 hours",
+        2: "0.5 - 1 hours",
+        3: "1 - 3 hours",
+        5: "3 - 6 hours",
+        8: "6 - 12 hours",
+        13: "12+ hours"
+    }
+
+    const updateSessionHandler = async (event) => {
+        const fetchRes = await fetch(`/api/sessions/fetch/${props.taskId}`, {method: "GET"})
+
+        if (fetchRes.ok) {
+            const body = await fetchRes.json()
+            setSessions(body.body);
+            toast({
+                position: "top-right",
+                title: `Session ${event} Successful!`,
+                status: "success",
+                duration: 3000,
+                isClosable: true
+            });
+        }
     }
 
     const productivityRatingOptions = [
@@ -270,7 +287,7 @@ export default function TaskDetails(props) {
             Cell: ({ value }) => {
                 return (
                 <>
-                   <EditSessionModal session={value} userId={props.userId} updateSessionHandler={()=>void 0}/>
+                   <EditSessionModal session={value} userId={props.userId} updateSessionHandler={updateSessionHandler}/>
                 </>
                 );
             },
@@ -285,7 +302,7 @@ export default function TaskDetails(props) {
             Cell: ({ value }) => {
                 return (
                 <>
-                    <DeleteSessionModal userId={props.userId} sessionId={value}/>
+                    <DeleteSessionModal userId={props.userId} sessionId={value} updateSessionHandler={updateSessionHandler}/>
                 </>
                 );
             },
@@ -370,11 +387,6 @@ export default function TaskDetails(props) {
             </Flex>
             <Flex mx="1%" mt="3%" justify="space-evenly">
                 <Card bg="blue.50" size="lg">
-                    <CardHeader>
-                        <Text as="b" fontSize="2xl">
-                            Metrics
-                        </Text>
-                    </CardHeader>
                     <CardBody>
                         <Flex>
                             <Stack align="center">
@@ -393,11 +405,6 @@ export default function TaskDetails(props) {
                     </CardBody>
                 </Card>
                 <Card bg="blue.50" size="md" minWidth="25%">
-                    <CardHeader>
-                        <Text as="b" fontSize="2xl">
-                            Stopwatch
-                        </Text>
-                    </CardHeader>
                     <CardBody  px="4%">
                         <Stack align="center">
                             <Text align="center" as="b" fontSize="4xl">
@@ -494,7 +501,12 @@ export async function getServerSideProps(context) {
                     id: task.id
                 }
             }
-        }
+        },
+        orderBy: [
+            {
+                id: 'desc'
+            }
+        ]
     })
 
     if (!session) {

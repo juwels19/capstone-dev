@@ -1,5 +1,5 @@
-import { SmallAddIcon, ChevronRightIcon, InfoIcon } from "@chakra-ui/icons";
-import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, HStack } from "@chakra-ui/react";
+import { SmallAddIcon, ChevronRightIcon, InfoIcon, CheckIcon } from "@chakra-ui/icons";
+import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack } from "@chakra-ui/react";
 import {
     Modal,
     ModalOverlay,
@@ -7,20 +7,16 @@ import {
     ModalHeader,
     ModalBody,
     ModalCloseButton,
-    Checkbox,
   } from '@chakra-ui/react';
-import { useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
-import { getSession } from "next-auth/react";
+import { signOut, getSession } from "next-auth/react";
 import { useSearchParams } from 'next/navigation';
+import Link from "next/link";
 import { Select, CreatableSelect } from "chakra-react-select";
-// import Task from "../src/components/Task"; // TODO: remove once table is working
+
+import prisma from "@prisma/index";
 import Table from "@components/Table";
 import NoTasks from "@components/tasks/NoTasks";
-
-import Link from "next/link";
-import prisma from "@prisma/index";
 import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
 import calculateDateDifference from "src/utils/dateCalc"
@@ -41,6 +37,10 @@ export default function Tasklist(props) {
     const [courseOptions, setCourseOptions] = useState(props.courses);
     const [tasks, setTasks] = useState(props.tasks)
 
+    const [show, setShow] = useState(false);
+
+    const handleToggle = () => setShow(!show);
+
     useEffect(() => {
         setTaskName("")
         setEffort(0)
@@ -56,6 +56,23 @@ export default function Tasklist(props) {
         {value: 8, label: "8 (6-12 hours)"},
         {value: 13, label: "13 (12+ hours)"},
     ];
+
+    const effortValueToLabel = {
+        1: "< 0.5 hours",
+        2: "0.5 - 1 hours",
+        3: "1 - 3 hours",
+        5: "3 - 6 hours",
+        8: "6 - 12 hours",
+        13: "12+ hours"
+    }
+
+    const calculateSessionTime = (sessions) => {
+        var totalDuration = 0;
+        for (const session of sessions) {
+            totalDuration += session.duration;
+        }
+        return (totalDuration / 3600).toFixed(2);
+    }
 
     const postCreateCourse = async (newCourseName, userId) => {
         let body = {
@@ -82,7 +99,7 @@ export default function Tasklist(props) {
     
     const handleCreateTaskSubmit = async (event) => {
         event.preventDefault();
-        if (taskName, effort, !isNaN(Date.parse(dueDate))) {
+        if (taskName, effort, !isNaN(Date.parse(dueDate)), courseSelected) {
             // Data is valid for task creation
             let body = {
                 taskName: taskName,
@@ -151,8 +168,15 @@ export default function Tasklist(props) {
             maxWidth: 100,
             Cell: ({ value }) => {
                 return (
-                <>
-                    <Checkbox background='white' size='lg'/>
+                <>  
+                    <Button 
+                        leftIcon={<CheckIcon />} 
+                        colorScheme="blue"
+                        variant="ghost"
+                        ml="5%">
+                        Mark Complete
+                    </Button>
+                    {/* <Checkbox background='white' size='lg'> Mark as Completed</Checkbox> */}
                 </>
                 );
             },
@@ -228,8 +252,9 @@ export default function Tasklist(props) {
             },
         },
         {
-            Header: 'Estimated Time (Hours)',
-            accessor: 'completionTimeEstimate',
+            Header: 'Estimated Time',
+            accessor: 'effortRating',
+            id: "time_estimate",
             width: 180,
             minWidth: 180,
             maxWidth: 180,
@@ -237,15 +262,15 @@ export default function Tasklist(props) {
                 return (
                 <>
                     <Text>
-                    {`${value}`}
+                    {effortValueToLabel[value]}
                     </Text>
                 </>
                 );
             },
         },
         {
-            Header: 'Actual Time (Hours)',
-            accessor: 'actual_time',
+            Header: 'Actual Time',
+            accessor: 'sessions',
             width: 100,
             minWidth: 100,
             maxWidth: 180,
@@ -253,7 +278,7 @@ export default function Tasklist(props) {
                 return (
                 <>
                     <Text>
-                    {`${value}`}
+                        {calculateSessionTime(value)} hours
                     </Text>
                 </>
                 );
@@ -362,7 +387,7 @@ export default function Tasklist(props) {
                                 onChange={(e) => setTaskName(e.target.value)}
                             />
                         </ FormControl>
-                        <FormControl mt="2%">
+                        <FormControl mt="2%" isRequired>
                             <FormLabel fontWeight="bold">Assign Course</FormLabel>
                             <FormHelperText mb="1%">Assigning a course helps keep your tasks organized. We recommend assigning a course to a task.</FormHelperText>
                             <CreatableSelect 
@@ -399,7 +424,7 @@ export default function Tasklist(props) {
                                 width="100%"
                                 variant="outline"
                                 bg="white"
-                                type="datetime-local"
+                                type="date"
                                 onChange={(e) => setDueDate(e.target.value)}
                             />
                         </FormControl>
@@ -451,7 +476,18 @@ export async function getServerSideProps(context) {
     }
 
     // Get the tasks associated with this user
-    const tasks = await prisma.task.findMany({where: {userId: session.id}, include: {course: true}})
+    const tasks = await prisma.task.findMany({
+        where: {
+            userId: session.id
+        }, 
+        include: {
+            course: true, 
+            sessions: {
+                select: {
+                    duration: true
+                }
+            }
+        }})
     console.log(tasks)
 
     if (!session) {

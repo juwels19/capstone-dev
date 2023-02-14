@@ -11,13 +11,13 @@ import {
     FormControl,
     FormLabel,
     FormHelperText,
-    Input,
     ButtonGroup,
+    Textarea
 } from '@chakra-ui/react';
 import {
     EditIcon
 } from '@chakra-ui/icons'
-import { Select, CreatableSelect } from "chakra-react-select";
+import { Select } from "chakra-react-select";
 import { useState } from "react";
 
 export default function EditSessionModal(props) {
@@ -29,7 +29,7 @@ export default function EditSessionModal(props) {
 
     const { isOpen: editSessionIsOpen, onClose: editSessionOnClose, onOpen: editSessionOnOpen } = useDisclosure();
     const [productivityRating, setProductivityRating] = useState(session.productivityRating);
-    const [notes, setNotes] = useState(session.Notes);
+    const [notes, setNotes] = useState(session.notes);
 
     const productivityRatingOptions = [
         {value: 1, label: 1},
@@ -41,13 +41,12 @@ export default function EditSessionModal(props) {
 
     const handleEditSessionSubmit = async (event) => {
         event.preventDefault();
-        // const body = {
-        //     userId: task.userId,
-        //     sessionId: session.id,
-        //     productivityRating: productivityRating,
-        //     sessionNotes: sessionNotes,
-        // }
-        // await fetch (`/api/sessions/${session.id}`, {method: "POST", body: JSON.stringify(body)})
+        const body = {
+            userId: userId,
+            productivityRating: productivityRating,
+            notes: notes,
+        }
+        await fetch (`/api/sessions/${session.id}`, {method: "POST", body: JSON.stringify(body)})
         editSessionOnClose();
         await updateSessionHandler("Edit");
     }
@@ -62,14 +61,15 @@ export default function EditSessionModal(props) {
                     <ModalBody>
                         <FormControl isRequired>
                             <FormLabel fontWeight="bold">Notes</FormLabel>
-                            <Input 
+                            <Textarea onChange={(e) => setNotes(e.target.value)} value={notes}/>
+                            {/* <Input 
                                 width="100%" 
                                 variant="outline" 
                                 bg="white" 
                                 placeholder="Enter Session Notes"
                                 onChange={(e) => setNotes(e.target.value)}
                                 value={notes}
-                            />
+                            /> */}
                         </ FormControl>
                         <FormControl isRequired>
                             <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>
@@ -81,6 +81,7 @@ export default function EditSessionModal(props) {
                                 placeholder="Select a Productivity Rating"
                                 options={productivityRatingOptions}
                                 onChange={(e) => setProductivityRating(e.value)}
+                                value={{label: productivityRating, value: productivityRating}}
                             />
                         </FormControl>
                         <ButtonGroup sz="md" mt="5%" minWidth="100%">

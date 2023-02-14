@@ -86,7 +86,7 @@ export default function Login() {
                             Don&apos;t have an account?
                         </Text>
                         <Link as={NextLink} href="/signup" fontSize="xs" color="blue.600">
-                            SIGN UP HERE
+                            sign up here
                         </Link>
                     </Box>
                 </CardBody>

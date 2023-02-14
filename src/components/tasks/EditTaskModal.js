@@ -47,8 +47,6 @@ export default function EditTaskModal(props) {
         13: "13 (12+ hours)",
     }
 
-    console.log("in table")
-
     const { isOpen: editTaskIsOpen, onClose: editTaskOnClose, onOpen: editTaskOnOpen } = useDisclosure();
 
     const [taskName, setTaskName] = useState(task.taskName);

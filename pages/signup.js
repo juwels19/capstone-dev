@@ -164,7 +164,7 @@ export default function Signup() {
                             Already have an account?
                         </Text>
                         <Link as={NextLink} href="/login" fontSize="xs" color="blue.600">
-                            LOGIN HERE
+                            login here
                         </Link>
                     </Box>
                 </CardBody>
