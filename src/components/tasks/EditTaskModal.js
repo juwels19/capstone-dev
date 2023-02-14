@@ -30,19 +30,21 @@ export default function EditTaskModal(props) {
     } = props;
 
     const effortOptions = [
-        {value: 1, label: "1 (0-2 hours)"},
-        {value: 2, label: "2 (2-4 hours)"},
-        {value: 3, label: "3 (4-6 hours)"},
-        {value: 4, label: "4 (6-8 hours)"},
-        {value: 5, label: "5 (8+ hours)"},
+        {value: 1, label: "1 (< 0.5 hours)"},
+        {value: 2, label: "2 (0.5-1 hours)"},
+        {value: 3, label: "3 (1-3 hours)"},
+        {value: 5, label: "5 (3-6 hours)"},
+        {value: 8, label: "8 (6-12 hours)"},
+        {value: 13, label: "13 (12+ hours)"},
     ];
 
     const effortValueToLabel = {
-        1: "1 (0-2 hours)",
-        2: "2 (2-4 hours)",
-        3: "3 (4-6 hours)",
-        4: "4 (6-8 hours)",
-        5: "5 (8+ hours)",
+        1: "1 (< 0.5 hours)",
+        2: "2 (0.5-1 hours)",
+        3: "3 (1-3 hours)",
+        5: "5 (3-6 hours)",
+        8: "8 (6-12 hours)",
+        13: "13 (12+ hours)",
     }
 
     console.log("in table")
@@ -141,7 +143,7 @@ export default function EditTaskModal(props) {
                 onClick={editTaskOnOpen}
                 icon={<EditIcon />}
                 variant="ghost"
-                ml="2%"
+                size='lg'
             />
         </>
     );

@@ -3,6 +3,8 @@ import NextLink from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { getSession } from "next-auth/react";
+import { useToast } from "@chakra-ui/react";
+import { useRouter } from 'next/router'
 
 export default function Login() {
     const [show, setShow] = useState(false);
@@ -10,9 +12,28 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const handleClick = () => setShow(!show);
 
+    const toast = useToast();
+    const router = useRouter();
+    
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-        await signIn("credentials", {email: email, password: password, callbackUrl: "/tasklist"});
+        await signIn("credentials", {email: email, password: password, redirect: false}).then(
+            ({ok}) => {
+                if (ok) {
+                    router.push("/tasklist")
+                } else {
+                    toast({
+                        position: "top-middle",
+                        title: "Login Failed",
+                        description: "The email and/or password entered is incorrect.",
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true
+                    });
+                }
+            }
+        );
     }
 
     return (

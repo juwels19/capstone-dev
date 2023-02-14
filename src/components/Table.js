@@ -71,7 +71,7 @@ export default function Table(props){
                 {headerGroup.headers.map(column => (
                   <Th
                     paddingX="0"
-                    fontSize="17px"
+                    fontSize="16px"
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     width={column.width}
                     minWidth={column.minWidth}
@@ -129,6 +129,7 @@ export default function Table(props){
                       key={`cell-${i}`}
                       _first={{borderStartRadius: 'md'}}
                       _last={{borderEndRadius: 'md'}}
+                      fontSize='14px'
                     >
                       {cell.render('Cell')}
                     </Td>

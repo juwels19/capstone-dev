@@ -2,14 +2,14 @@ const Table = {
   parts: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'caption'],
   baseStyle: {
     th: {
-      fontWeight: 'semibold',
+      fontWeight: 'bold',
       textTransform: 'none',
       letterSpacing: 'none',
       textAlign: 'center',
     },
     td: {
       fontSize: '16px',
-      backgroundColor: 'gray.200',
+      backgroundColor: '#EDF2F7',
       textAlign: 'center',
     },
   },

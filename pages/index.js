@@ -1,6 +1,6 @@
 import { Center, Button, ButtonGroup, Card, CardBody, CardFooter, Text } from "@chakra-ui/react";
 import Image from "next/image";
-import timelyLogo from "../public/timely_logo.png";
+import timeifyLogo from "../public/timeify_logo.png";
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -11,7 +11,7 @@ export default function Home() {
             <Center height="calc(100vh)">
               <Card size="lg" colorScheme="gray" variant="filled" align="center" justify="center">
                   <CardBody>
-                      <Image src={timelyLogo} alt="timely logo"/>
+                      <Image src={timeifyLogo} alt="timely logo"/>
                       <Text className="font-bold" mt="2%">
                           Manage, understand, and improve your time management skills through self-monitoring
                       </Text>

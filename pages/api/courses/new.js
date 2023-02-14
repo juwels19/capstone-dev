@@ -1,4 +1,5 @@
 import prisma from "@prisma/index"
+import colours from "src/utils/colours";
 
 // api/tasks/new
 async function handler(req, res) {
@@ -16,8 +17,17 @@ async function handler(req, res) {
             }
         })
 
+        const updatedCourse = await prisma.course.update({
+            where: {
+                id: newCourse.id
+            },
+            data: {
+                colourCode: colours[newCourse.id % colours.length]
+            }
+        })
+
         //Send success response
-        res.status(201).json({ message: 'Course created', ...newCourse });
+        res.status(201).json({ message: 'Course created', ...updatedCourse });
     } else {
         //Response for other than POST method
         res.status(500).json({ message: 'Request not valid' });

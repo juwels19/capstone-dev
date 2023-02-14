@@ -1,6 +1,6 @@
 import { Box, Button, ButtonGroup, Card, CardBody, CardHeader, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import {
-    Modal, ModalOverlay, ModalContent, ModalHeader, FormControl, FormLabel, Input, Textarea
+    Modal, ModalOverlay, ModalContent, ModalHeader, FormControl, FormLabel, Input, Textarea, Tag
 } from "@chakra-ui/react"
 import { Select } from "chakra-react-select";
 import { getSession } from "next-auth/react";
@@ -11,9 +11,15 @@ import { useState, useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 
 import prisma from "@prisma/index";
+import calculateDateDifference from "src/utils/dateCalc"
+
+import EditSessionModal from "@components/sessions/EditSessionModal";
+import DeleteSessionModal from "@components/sessions/DeleteSessionModal";   
+// import NoSessions from "@components/sessions/NoSessions";
+
+import Table from "@components/Table";
 
 export default function TaskDetails(props) {
-
     const task = props.task;
     const router = useRouter();
     const toast = useToast();
@@ -32,8 +38,6 @@ export default function TaskDetails(props) {
     const [averageSessionTime, setAverageSessionTime] = useState(0.0);
 
     const { isOpen: createSessionIsOpen, onOpen: createSessionOnOpen, onClose: createSessionOnClose } = useDisclosure();
-    const { isOpen: editSessionIsOpen, onOpen: editSessionOnOpen, onClose: editSessionOnClose } = useDisclosure();
-    const { isOpen: deleteSessionIsOpen, onOpen: deleteSessionOnOpen, onClose: deleteSessionOnClose } = useDisclosure();
 
     useEffect(() => {
         let interval = null;
@@ -97,7 +101,6 @@ export default function TaskDetails(props) {
     }
 
     const handleWorkingSessionCreation = async () => {
-        console.log(productivityRating, notes)
         if (productivityRating === 0 || time === 0) {
             toast({
                 position: "top-middle",
@@ -138,7 +141,6 @@ export default function TaskDetails(props) {
     }
 
     const handleBackButton = () => {
-
         if (isActive) {
             toast({
                 position: "top-middle",
@@ -170,33 +172,128 @@ export default function TaskDetails(props) {
         {value: 5, label: 5},
     ];
 
-    const calculateDateDifference = (dueDate) => {
-        const msInDay = 86400000;
-        let currDate = Date.now()
-        // Convert the due date string to milliseconds for comparison
-        let dueDateNumeric = Date.parse(dueDate)
-        const diff = dueDateNumeric - currDate;
-        if (diff >= 0) {
-            // Due date is more than a day in the future
-            const daysAway = Math.floor(diff / msInDay);
-            if (daysAway > 1) {
-                return `(due in ${daysAway} days)`;
-            } else {
-                return `(due in ${daysAway} day)`;
-            }
-        } else {
-            const daysAgo = Math.abs(Math.floor(diff / msInDay)) - 1;
-            if (daysAgo > 1) {
-                return `(was due ${daysAgo} days ago)`
-            } else {
-                return `(was due ${daysAgo} day ago)`
-            }
-        }
-
-    }
+    const COLUMNS = [
+        {
+            Header: 'Date',
+            accessor: 'startDateTime',
+            width: 30,
+            minWidth: 30,
+            maxWidth: 60,
+            Cell: ({ value }) => {
+                const options = {month: "short", year: 'numeric', day: "numeric"}
+                return (
+                <>
+                    <Text>{new Date(value).toLocaleDateString('en-us', options)}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Time Started',
+            accessor: 'startDatetime',
+            width: 30,
+            minWidth: 30,
+            maxWidth: 60,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{value}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Time Ended',
+            id: 'huh',
+            accessor: 'duration',
+            width: 30,
+            minWidth: 30,
+            maxWidth: 60,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{value}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Duration',
+            accessor: 'duration',
+            width: 30,
+            minWidth: 30,
+            maxWidth: 60,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{value}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Productivity Rating',
+            accessor: 'productivityRating',
+            width: 30,
+            minWidth: 30,
+            maxWidth: 60,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{value}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Notes',
+            accessor: 'notes',
+            width: 80,
+            minWidth: 100,
+            maxWidth: 100,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{value}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: '',
+            id: 'editSession',
+            accessor: (row) => row,
+            width: 10,
+            minWidth: 10,
+            maxWidth: 10,
+            sortDescFirst: true,
+            Cell: ({ value }) => {
+                return (
+                <>
+                   <EditSessionModal session={value} userId={props.userId} updateSessionHandler={()=>void 0}/>
+                </>
+                );
+            },
+        },
+        {
+            Header: '',
+            accessor: 'id',
+            id: 'deleteSession',
+            width: 10,
+            minWidth: 10,
+            maxWidth: 10,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <DeleteSessionModal userId={props.userId} sessionId={value}/>
+                </>
+                );
+            },
+        },
+    ]
 
     return (
-        <Box px="5%" pt="2%">
+        <Box px="5%" pt="2%" width="100vw">
             <Modal size="2xl" isOpen={createSessionIsOpen} onClose={createSessionOnClose}>
                 <ModalOverlay />
                 <ModalContent>
@@ -213,7 +310,7 @@ export default function TaskDetails(props) {
                                 onChange={(e) => setTime(e.target.value)}
                                 value={time}
                             />
-                        </ FormControl>
+                        </FormControl>
                         <FormControl isRequired>
                             <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>
                             <FormHelperText mb="1%">Rate how productive you felt your working session was. (DEFINE 1-5 MEANING)</FormHelperText>
@@ -225,7 +322,7 @@ export default function TaskDetails(props) {
                                 options={productivityRatingOptions}
                                 onChange={(e) => setProductivityRating(e.value)}
                             />
-                        </ FormControl>
+                        </FormControl>
                         <FormControl>
                             <FormLabel mt="2%" fontWeight="bold">Notes</FormLabel>
                             <FormHelperText mb="1%">Add any notes or reflections about your working session</FormHelperText>
@@ -262,7 +359,7 @@ export default function TaskDetails(props) {
             </Flex>
             <Flex mt="1%">
                 <Text as="b">Course:</Text>
-                <Text ml="0.5%">{task.course.courseName}</Text>
+                <Tag ml="0.5%" backgroundColor={task.course.colourCode} textColor="white">{task.course.courseName}</Tag>
                 <Text as="b" ml="2%">Due Date:</Text>
                 <Text ml="0.5%">{new Date(task.dueDate).toDateString()}</Text>
                 <Text ml="1%" color="gray.500">{calculateDateDifference(task.dueDate)}</Text>
@@ -348,6 +445,20 @@ export default function TaskDetails(props) {
             </Flex>
             <Heading as="h2" size="lg" mt="3%">Working Session Log</Heading>
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
+            {
+                sessions.length === 0 
+                ? <NoTasks />
+                : (
+                    <Box padding="3% 0 0 0">
+                        <Table 
+                            columns={COLUMNS} 
+                            data={sessions}
+                            borderSpacing='0 15px'
+
+                        />
+                    </Box>  
+                )
+            }
         </Box>
     );
 }
@@ -360,27 +471,18 @@ export async function getServerSideProps(context) {
     if (isNaN(parseInt(taskId))) {
         return {
             redirect: {
-                destination: "/tasklist",
+                destination: "/tasklist?message=invalid_data",
                 permanent: false
-            },
-            props: {
-                message: "Invalid task id!"
             },
         };
     }
 
     const task = await prisma.task.findUnique({where: {id: taskId}, include: {course: true}})
-    console.log(task);
-
     if (task === null) {
         return {
             redirect: {
-                destination: "/tasklist",
+                destination: "/tasklist?message=task_dne",
                 permanent: false
-            },
-            props: {
-                message: "That task doesn't exist!",
-                error: true
             },
         };
     }
@@ -395,20 +497,12 @@ export async function getServerSideProps(context) {
         }
     })
 
-    console.log(sessions);
-
-    console.log("session=getServerSideProps(context) in login: ", session)
-
     if (!session) {
         if (session.id !== task.userId) {
             return {
                 redirect: {
-                    destination: "/tasklist",
+                    destination: "/tasklist?message=not_permitted",
                     permanent: false
-                },
-                props: {
-                    message: "You are not permitted to view that page!",
-                    error: true
                 },
             };
         }

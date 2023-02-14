@@ -22,6 +22,7 @@ export default function DeleteTaskModal(props) {
 
     const deleteTaskHandler = async () => {
         //TODO add error handling here
+        console.log("inside delete modal handler")
         const deleteRes = await fetch(`/api/tasks/${task.id}`, {method: "DELETE"})
         deleteTaskOnClose();
         props.updateTaskHandler("Deletion");
@@ -35,7 +36,8 @@ export default function DeleteTaskModal(props) {
                     <ModalHeader fontWeight="bold" fontSize="2xl">Delete Task</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <Text>Are you sure you want to delete this task? It cannot be recovered.</Text>
+                        <Text as="b">Are you sure you want to delete this task?</Text>
+                        <Text>This action will also delete the working sessions associated with this task.</Text>
                         <ButtonGroup sz="md" mt="5%" minWidth="100%">
                             <Button colorScheme="gray" onClick={deleteTaskOnClose} width="100%">
                                 Cancel
@@ -57,6 +59,7 @@ export default function DeleteTaskModal(props) {
                 onClick={deleteTaskOnOpen}
                 icon={<Icon as={FaTrash} />}
                 variant="ghost"
+                size='lg'
             />
         </>
     );

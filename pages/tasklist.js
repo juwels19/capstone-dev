@@ -1,5 +1,5 @@
 import { SmallAddIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Text, useDisclosure } from "@chakra-ui/react";
 import {
     Modal,
     ModalOverlay,
@@ -7,25 +7,30 @@ import {
     ModalHeader,
     ModalBody,
     ModalCloseButton,
+    Checkbox,
   } from '@chakra-ui/react';
 import { useToast } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { getSession } from "next-auth/react";
+import { useSearchParams } from 'next/navigation';
 import { Select, CreatableSelect } from "chakra-react-select";
-import Task from "../src/components/Task"; // TODO: remove once table is working
+// import Task from "../src/components/Task"; // TODO: remove once table is working
 import Table from "@components/Table";
-import NoTasks from "@components/NoTasks";
+import NoTasks from "@components/tasks/NoTasks";
 
 import Link from "next/link";
 import prisma from "@prisma/index";
-import EditTaskModal from "@components/EditTaskModal";
-import DeleteTaskModal from "@components/DeleteTaskModal";
+import EditTaskModal from "@components/tasks/EditTaskModal";
+import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
+import calculateDateDifference from "src/utils/dateCalc"
 
 export default function Tasklist(props) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
+    const searchParams = useSearchParams();
+    const message = searchParams.get("message");
 
     const [taskName, setTaskName] = useState("");
     const [courseSelected, setCourseSelected] = useState(null);
@@ -44,11 +49,12 @@ export default function Tasklist(props) {
     }, [isOpen])
 
     const effortOptions = [
-        {value: 1, label: "1 (0-2 hours)"},
-        {value: 2, label: "2 (2-4 hours)"},
-        {value: 3, label: "3 (4-6 hours)"},
-        {value: 4, label: "4 (6-8 hours)"},
-        {value: 5, label: "5 (8+ hours)"},
+        {value: 1, label: "1 (< 0.5 hours)"},
+        {value: 2, label: "2 (0.5-1 hours)"},
+        {value: 3, label: "3 (1-3 hours)"},
+        {value: 5, label: "5 (3-6 hours)"},
+        {value: 8, label: "8 (6-12 hours)"},
+        {value: 13, label: "13 (12+ hours)"},
     ];
 
     const postCreateCourse = async (newCourseName, userId) => {
@@ -119,37 +125,69 @@ export default function Tasklist(props) {
         }
     }
 
+    const renderErrorToast = () => {
+        console.log("message = ", message)
+        let description = ""
+        if (message === "invalid_data") {
+            description = "Invalid task id, please use the 'Open Task' buttons on the table below."
+        }
+        // toast({
+        //     position: "top-middle",
+        //     title: "Task Error",
+        //     description: description,
+        //     status: "error",
+        //     duration: 3000,
+        //     isClosable: true
+        // })
+    }
+
     const COLUMNS = [
         {
             Header: '',
-            accessor: 'taskName',
-            width: 180,
-            minWidth: 180,
-            maxWidth: 180,
-            sortDescFirst: true,
+            id: 'checkbox',
+            accessor: (row) => row,
+            width: 100,
+            minWidth: 100,
+            maxWidth: 100,
             Cell: ({ value }) => {
                 return (
                 <>
-                    <Text>
-                        {`${value}`}
-                    </Text>
+                    <Checkbox background='white' size='lg'/>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Task',
+            accessor: 'taskName',
+            width: 150,
+            minWidth: 100,
+            maxWidth: 180,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{`${value}`}</Text>
                 </>
                 );
             },
         },
         {
             Header: 'Course',
-            accessor: 'course.courseName',
-            width: 180,
-            minWidth: 180,
+            accessor: 'course',
+            width: 100,
+            minWidth: 100,
             maxWidth: 180,
-            sortDescFirst: true,
             Cell: ({ value }) => {
+                console.log(value)
+                let bgColor = value.colourCode;
+                if ( bgColor === null) {
+                    bgColor = "gray.300"
+                }
                 return (
                 <>
-                    <Text>
-                    {`${value}`}
-                    </Text>
+                    <Tag backgroundColor={bgColor} textColor="white">
+                        {`${value.courseName}`}
+                    </Tag>
                 </>
                 );
             },
@@ -160,12 +198,14 @@ export default function Tasklist(props) {
             width: 180,
             minWidth: 180,
             maxWidth: 180,
-            sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                 <>
+                    <Text as="b">
+                    {new Date(`${value}`).toDateString()}
+                    </Text>
                     <Text>
-                    {`${value}`}
+                        {calculateDateDifference(`${value}`)}
                     </Text>
                 </>
                 );
@@ -174,10 +214,9 @@ export default function Tasklist(props) {
         {
             Header: 'Predicted Effort',
             accessor: 'effortRating',
-            width: 180,
-            minWidth: 180,
+            width: 100,
+            minWidth: 100,
             maxWidth: 180,
-            sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -189,12 +228,11 @@ export default function Tasklist(props) {
             },
         },
         {
-            Header: 'Estimated Time',
+            Header: 'Estimated Time (Hours)',
             accessor: 'completionTimeEstimate',
             width: 180,
             minWidth: 180,
             maxWidth: 180,
-            sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -206,12 +244,11 @@ export default function Tasklist(props) {
             },
         },
         {
-            Header: 'Actual Time',
+            Header: 'Actual Time (Hours)',
             accessor: 'actual_time',
-            width: 180,
-            minWidth: 180,
+            width: 100,
+            minWidth: 100,
             maxWidth: 180,
-            sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -385,7 +422,7 @@ export default function Tasklist(props) {
                             borderSpacing='0 15px'
 
                         />
-                    </Box>
+                    </Box>  
                 )
             }
         </Box>
