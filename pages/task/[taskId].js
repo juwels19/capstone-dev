@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Card, CardBody, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Card, CardBody, CardHeader, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure } from "@chakra-ui/react";
 import {
     Modal, ModalOverlay, ModalContent, ModalHeader, FormControl, FormLabel, Input, Textarea
 } from "@chakra-ui/react"
@@ -62,10 +62,14 @@ export default function TaskDetails(props) {
             totalDuration += session.duration;
         }
         totalDuration = (totalDuration / 3600).toFixed(2);
-        let avgSessionTimeHours = (totalDuration / numSessions).toFixed(2);
+        if (numSessions === 0) {
+            setAverageSessionTime(0.0)
+        } else {
+            let avgSessionTimeHours = (totalDuration / numSessions).toFixed(2);
+            setAverageSessionTime(avgSessionTimeHours)
+        }
         setTotalSessionTime(totalDuration)
         setTotalSessions(numSessions)
-        setAverageSessionTime(avgSessionTimeHours)
     }, [sessions])
 
     const handleStopwatchStart = () => {
@@ -166,6 +170,31 @@ export default function TaskDetails(props) {
         {value: 5, label: 5},
     ];
 
+    const calculateDateDifference = (dueDate) => {
+        const msInDay = 86400000;
+        let currDate = Date.now()
+        // Convert the due date string to milliseconds for comparison
+        let dueDateNumeric = Date.parse(dueDate)
+        const diff = dueDateNumeric - currDate;
+        if (diff >= 0) {
+            // Due date is more than a day in the future
+            const daysAway = Math.floor(diff / msInDay);
+            if (daysAway > 1) {
+                return `(due in ${daysAway} days)`;
+            } else {
+                return `(due in ${daysAway} day)`;
+            }
+        } else {
+            const daysAgo = Math.abs(Math.floor(diff / msInDay)) - 1;
+            if (daysAgo > 1) {
+                return `(was due ${daysAgo} days ago)`
+            } else {
+                return `(was due ${daysAgo} day ago)`
+            }
+        }
+
+    }
+
     return (
         <Box px="5%" pt="2%">
             <Modal size="2xl" isOpen={createSessionIsOpen} onClose={createSessionOnClose}>
@@ -236,7 +265,7 @@ export default function TaskDetails(props) {
                 <Text ml="0.5%">{task.course.courseName}</Text>
                 <Text as="b" ml="2%">Due Date:</Text>
                 <Text ml="0.5%">{new Date(task.dueDate).toDateString()}</Text>
-                <Text ml="1%" color="gray.500">Date calc. goes here</Text>
+                <Text ml="1%" color="gray.500">{calculateDateDifference(task.dueDate)}</Text>
                 <Text as="b" ml="2%">Effort:</Text>
                 <Text ml="0.5%">{task.effortRating}</Text>
                 <Text as="b" ml="2%">Estimated Time:</Text>
@@ -244,6 +273,11 @@ export default function TaskDetails(props) {
             </Flex>
             <Flex mx="1%" mt="3%" justify="space-evenly">
                 <Card bg="blue.50" size="lg">
+                    <CardHeader>
+                        <Text as="b" fontSize="2xl">
+                            Metrics
+                        </Text>
+                    </CardHeader>
                     <CardBody>
                         <Flex>
                             <Stack align="center">
@@ -261,8 +295,13 @@ export default function TaskDetails(props) {
                         </Flex>
                     </CardBody>
                 </Card>
-                <Card bg="blue.50" size="md" px="4%" minWidth="25%">
-                    <CardBody>
+                <Card bg="blue.50" size="md" minWidth="25%">
+                    <CardHeader>
+                        <Text as="b" fontSize="2xl">
+                            Stopwatch
+                        </Text>
+                    </CardHeader>
+                    <CardBody  px="4%">
                         <Stack align="center">
                             <Text align="center" as="b" fontSize="4xl">
                                 {("0" + Math.floor(time / 3600)).slice(-2)}:
@@ -307,7 +346,7 @@ export default function TaskDetails(props) {
                     </CardBody>
                 </Card>
             </Flex>
-            <Heading as="h2" size="lg" mt="3%">Working Sessions</Heading>
+            <Heading as="h2" size="lg" mt="3%">Working Session Log</Heading>
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
         </Box>
     );
@@ -318,8 +357,33 @@ export async function getServerSideProps(context) {
     const session = await getSession(context);
     const taskId = parseInt(context.query.taskId)
 
+    if (isNaN(parseInt(taskId))) {
+        return {
+            redirect: {
+                destination: "/tasklist",
+                permanent: false
+            },
+            props: {
+                message: "Invalid task id!"
+            },
+        };
+    }
+
     const task = await prisma.task.findUnique({where: {id: taskId}, include: {course: true}})
     console.log(task);
+
+    if (task === null) {
+        return {
+            redirect: {
+                destination: "/tasklist",
+                permanent: false
+            },
+            props: {
+                message: "That task doesn't exist!",
+                error: true
+            },
+        };
+    }
 
     const sessions = await prisma.session.findMany({
         where: {
@@ -336,6 +400,18 @@ export async function getServerSideProps(context) {
     console.log("session=getServerSideProps(context) in login: ", session)
 
     if (!session) {
+        if (session.id !== task.userId) {
+            return {
+                redirect: {
+                    destination: "/tasklist",
+                    permanent: false
+                },
+                props: {
+                    message: "You are not permitted to view that page!",
+                    error: true
+                },
+            };
+        }
         return {
             redirect: {
                 destination: "/login",

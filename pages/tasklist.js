@@ -239,7 +239,7 @@ export default function Tasklist(props) {
     ]
 
     return (
-        <Box px="5%">   
+        <Box px="5%">
             <Flex pt="5%">
                 <Heading as="h1" size="2xl">
                     {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}'s Task List
@@ -254,9 +254,8 @@ export default function Tasklist(props) {
                     </Button>
                     <Button size="md"
                             colorScheme="red"
-                            onClick={() => signOut({callbackUrl: "/"})}
-                            >
-                                Logout
+                            onClick={() => signOut({callbackUrl: "/"})}>
+                        Logout
                     </Button>
                 </ButtonGroup>
             </Flex>
@@ -353,10 +352,10 @@ export default function Tasklist(props) {
                     courseOptions={courseOptions}
                     handleCreateCourse={handleCreateCourse}
                 />))}
-                <Table
-                    columns={COLUMNS}
-                    data = {tasks}
-                />
+            <Table
+                columns={COLUMNS}
+                data = {tasks}
+            />
         </Box>
     );
 }
