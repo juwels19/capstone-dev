@@ -1,4 +1,4 @@
-import { SmallAddIcon } from "@chakra-ui/icons";
+import { SmallAddIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Text, useDisclosure } from "@chakra-ui/react";
 import {
     Modal,
@@ -13,11 +13,14 @@ import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { getSession } from "next-auth/react";
 import { Select, CreatableSelect } from "chakra-react-select";
-import Task from "../src/components/Task";
+import Task from "../src/components/Task"; // TODO: remove once table is working
 import Table from "@components/Table";
 import NoTasks from "@components/NoTasks";
 
+import Link from "next/link";
 import prisma from "@prisma/index";
+import EditTaskModal from "@components/EditTaskModal";
+import DeleteTaskModal from "@components/DeleteTaskModal";
 
 export default function Tasklist(props) {
 
@@ -118,7 +121,7 @@ export default function Tasklist(props) {
 
     const COLUMNS = [
         {
-            Header: 'Task',
+            Header: '',
             accessor: 'taskName',
             width: 180,
             minWidth: 180,
@@ -219,19 +222,64 @@ export default function Tasklist(props) {
                 );
             },
         },
-        {
+         {
             Header: '',
             accessor: 'id',
             width: 180,
             minWidth: 180,
             maxWidth: 180,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Link href={`/task/${value}`}>
+                        <Button 
+                            rightIcon={<ChevronRightIcon boxSize="1.5em"/>} 
+                            size="md" 
+                            colorScheme="blue">
+                            Open Task
+                        </Button>
+                    </Link>
+                </>
+                );
+            },
+        },
+        {
+            Header: '',
+            accessor: (row) => row,
+            id: 'editColumn',
+            width: 20,
+            minWidth: 20,
+            maxWidth: 20,
             sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                 <>
-                    <Text>
-                    {`${value}`}
-                    </Text>
+                    <EditTaskModal
+                        task={value} 
+                        updateTaskHandler={updateTasks}
+                        courseOptions={courseOptions}
+                        handleCreateCourse={handleCreateCourse}
+                    />
+                </>
+                );
+            },
+        },
+        {
+            Header: '',
+            accessor: (row) => row,
+            id: 'deleteColumn',
+            width: 20,
+            minWidth: 20,
+            maxWidth: 20,
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <DeleteTaskModal
+                        task={value} 
+                        updateTaskHandler={updateTasks}
+                        courseOptions={courseOptions}
+                        handleCreateCourse={handleCreateCourse}
+                    />
                 </>
                 );
             },
@@ -326,36 +374,20 @@ export default function Tasklist(props) {
                     </ModalBody>
                 </ModalContent>
             </Modal>
+            {
+                tasks.length === 0 
+                ? <NoTasks />
+                : (
+                    <Box padding="3% 0 0 0">
+                        <Table 
+                            columns={COLUMNS} 
+                            data={tasks}
+                            borderSpacing='0 15px'
 
-            <Flex pt="50px" minWidth="max-content">
-                <Text as="b" ml="20%">
-                    Course
-                </Text>
-                <Text as="b" ml="5%">
-                    Due Date
-                </Text>
-                <Text as="b" ml="5%">
-                    Predicted Effort
-                </Text>
-                <Text as="b" ml="5%">
-                    Estimated Time
-                </Text>
-                <Text as="b" ml="5%">
-                    Actual Time
-                </Text>
-            </Flex>
-            {tasks.length === 0 && <NoTasks />}
-            {tasks.length > 0 && tasks.map((task) => (
-                <Task 
-                    task={task} 
-                    updateTaskHandler={updateTasks}
-                    courseOptions={courseOptions}
-                    handleCreateCourse={handleCreateCourse}
-                />))}
-            <Table
-                columns={COLUMNS}
-                data = {tasks}
-            />
+                        />
+                    </Box>
+                )
+            }
         </Box>
     );
 }
