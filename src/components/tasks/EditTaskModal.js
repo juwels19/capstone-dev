@@ -117,7 +117,7 @@ export default function EditTaskModal(props) {
                                 width="100%"
                                 variant="outline"
                                 bg="white"
-                                type="datetime-local"
+                                type="date"
                                 onChange={(e) => setDueDate(e.target.value)}
                                 value={dueDate}
                             />

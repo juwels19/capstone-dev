@@ -64,6 +64,7 @@ model Task {
   completionTimeFinal Float?
   numSessions Int?
   avgSessionTime Float?
+  completed Boolean @default(false)
   sessions Session[]
 }
 

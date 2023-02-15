@@ -1,4 +1,4 @@
-import { SmallAddIcon, ChevronRightIcon, InfoIcon, CheckIcon } from "@chakra-ui/icons";
+import { SmallAddIcon, ChevronRightIcon, InfoIcon, CheckIcon, MinusIcon } from "@chakra-ui/icons";
 import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container } from "@chakra-ui/react";
 import {
     Modal,
@@ -19,7 +19,7 @@ import Table from "@components/Table";
 import NoTasks from "@components/tasks/NoTasks";
 import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
-import { calculateDateDifference } from "src/utils/dateUtils"
+import { calculateDateDifference, getHMSfromDuration } from "src/utils/dateUtils"
 
 export default function Tasklist(props) {
 
@@ -66,12 +66,21 @@ export default function Tasklist(props) {
         13: "12+ hours"
     }
 
+    const getTimeDisplay = (hours, minutes, seconds) => {
+        return (
+            hours ? `${hours.toFixed(0)}h ${minutes.toFixed(0)}m` : 
+            minutes ? `${minutes.toFixed(0)}m ${seconds.toFixed(0)}s` :
+            seconds ? `${seconds.toFixed(0)}s` : "-"
+        )
+    }
+
     const calculateSessionTime = (sessions) => {
         var totalDuration = 0;
         for (const session of sessions) {
             totalDuration += session.duration;
         }
-        return (totalDuration / 3600).toFixed(2);
+
+        return getTimeDisplay(...getHMSfromDuration(totalDuration));
     }
 
     const postCreateCourse = async (newCourseName, userId) => {
@@ -142,6 +151,17 @@ export default function Tasklist(props) {
         }
     }
 
+    const handleChangeCompleteStatus = async (event, task, isCompleted) => {
+        event.preventDefault();
+        const body = {completed: isCompleted}
+        await fetch (`/api/tasks/${task.id}`, {method: "POST", body: JSON.stringify(body)})
+        await updateTasks("Edit");
+    }
+
+    const completedTasks = tasks.filter((task) => task.completed);
+    const activeTasks = tasks.filter((task) => !task.completed);
+
+
     const renderErrorToast = () => {
         if (message === "invalid_data") {
             description = "Invalid task id, please use the 'Open Task' buttons on the table below."
@@ -161,16 +181,28 @@ export default function Tasklist(props) {
             Header: '',
             id: 'checkbox',
             accessor: (row) => row,
-            Cell: ({ }) => {
+            Cell: ({ value }) => {
                 return (
                 <>  
-                    <Button 
-                        leftIcon={<CheckIcon />} 
-                        colorScheme="blue"
-                        variant="ghost">
-                        <Text fontSize='14px'>Mark Complete</Text>
-                    </Button>
-                    {/* <Checkbox background='white' size='lg'> Mark as Completed</Checkbox> */}
+                    { value.completed ?
+                        <Button 
+                            leftIcon={<MinusIcon />} 
+                            colorScheme="red"
+                            variant="ghost"
+                            onClick={(event) => handleChangeCompleteStatus(event, value, false)}
+                        >
+                            <Text fontSize='14px'>Mark Active</Text>
+                        </Button>
+                        :
+                        <Button 
+                            leftIcon={<CheckIcon />} 
+                            colorScheme="blue"
+                            variant="ghost"
+                            onClick={(event) => handleChangeCompleteStatus(event, value, true)}
+                        >
+                            <Text fontSize='14px'>Mark Complete</Text>
+                        </Button>
+                    }
                 </>
                 );
             },
@@ -206,6 +238,7 @@ export default function Tasklist(props) {
         {
             Header: 'Due Date',
             accessor: 'dueDate',
+            id: "due_date",
             Cell: ({ value }) => {
                 return (
                 <>
@@ -253,7 +286,7 @@ export default function Tasklist(props) {
                 return (
                 <>
                     <Text>
-                        {calculateSessionTime(value)} hours
+                        {calculateSessionTime(value)}
                     </Text>
                 </>
                 );
@@ -262,6 +295,7 @@ export default function Tasklist(props) {
          {
             Header: '',
             accessor: 'id',
+            id: 'openTask',
             width: 150,
             minWidth: 150,
             maxWidth: 150,
@@ -291,12 +325,14 @@ export default function Tasklist(props) {
             Cell: ({ value }) => {
                 return (
                 <>
-                    <EditTaskModal
-                        task={value} 
-                        updateTaskHandler={updateTasks}
-                        courseOptions={courseOptions}
-                        handleCreateCourse={handleCreateCourse}
-                    />
+                    { !value.completed &&
+                        <EditTaskModal
+                            task={value} 
+                            updateTaskHandler={updateTasks}
+                            courseOptions={courseOptions}
+                            handleCreateCourse={handleCreateCourse}
+                        />
+                    }
                 </>
                 );
             },
@@ -311,12 +347,14 @@ export default function Tasklist(props) {
             Cell: ({ value }) => {
                 return (
                 <>
-                    <DeleteTaskModal
-                        task={value} 
-                        updateTaskHandler={updateTasks}
-                        courseOptions={courseOptions}
-                        handleCreateCourse={handleCreateCourse}
-                    />
+                    { !value.completed &&
+                        <DeleteTaskModal
+                            task={value} 
+                            updateTaskHandler={updateTasks}
+                            courseOptions={courseOptions}
+                            handleCreateCourse={handleCreateCourse}
+                        />
+                    }
                 </>
                 );
             },
@@ -325,7 +363,7 @@ export default function Tasklist(props) {
 
     return (
         <Container maxW='container.xl'>
-            <Flex pt="5%">
+            <Flex pt="5%" pb="5%">
                 <Heading as="h1" size="2xl">
                     {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}&apos;s Task List
                 </Heading>
@@ -417,18 +455,32 @@ export default function Tasklist(props) {
                     </ModalBody>
                 </ModalContent>
             </Modal>
+            <Heading as="h2" size="lg">
+                Active Tasks
+            </Heading>
             {
-                tasks.length === 0 
+                activeTasks.length === 0 
                 ? <NoTasks />
                 : (
-                    <Box padding="3% 0 0 0">
+                    <>
                         <Table 
                             columns={COLUMNS} 
-                            data={tasks}
+                            data={activeTasks}
                         />
-                    </Box>  
+                    </>
                 )
             }
+            {completedTasks.length > 0 && (
+                <>
+                    <Heading as="h2" size="lg" mt="2%">
+                        Completed Tasks
+                    </Heading>
+                    <Table 
+                        columns={COLUMNS.filter((col) => col.id != "due_date")} 
+                        data={completedTasks}
+                    />
+                </>
+            )}
         </Container>
     );
 }
@@ -460,7 +512,6 @@ export async function getServerSideProps(context) {
                 }
             }
         }})
-    console.log(tasks)
 
     if (!session) {
         return {

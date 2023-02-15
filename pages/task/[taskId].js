@@ -184,7 +184,7 @@ export default function TaskDetails(props) {
         return (
             hours ? `${hours.toFixed(0)}h ${minutes.toFixed(0)}m` : 
             minutes ? `${minutes.toFixed(0)}m ${seconds.toFixed(0)}s` :
-            `${seconds.toFixed(0)}s`
+            seconds ? `${seconds.toFixed(0)}s` : "-"
         )
     }
 
@@ -363,7 +363,7 @@ export default function TaskDetails(props) {
                 <Text ml="0.5%">{effortValueToLabel[task.effortRating]}</Text>
             </Flex>
             <Flex mt="3%" justify="space-between">
-                    <Card bg="blue.50" size="lg">
+                    <Card bg="blue.50" size="lg" w={task.completed ? "100%" : ""}>
                         <CardBody>
                             <Grid templateColumns='repeat(3, 1fr)' gap={8}>
                                 <GridItem w="100%">
@@ -387,59 +387,61 @@ export default function TaskDetails(props) {
                             </Grid>
                         </CardBody>
                     </Card>
-                    <Card bg="blue.50" size="lg" w="400px">
-                        <CardBody justify="space-between">
-                            <Flex direction="column" align="center" justify="space-between">
-                                <Text as="b" fontSize="3xl" mb="7px">
-                                    {("0" + Math.floor(time / 3600)).slice(-2)}:
-                                    {("0" + Math.floor((time / 60) % 60)).slice(-2)}:
-                                    {("0" + (time % 60)).slice(-2)}
-                                </Text>
-                                <HStack>
-                                    {!isActive && 
-                                        <Button size="sm" bg="white" aria-label="start-stopwatch" leftIcon={<Icon as={FaPlay}/>}
-                                            onClick={handleStopwatchStart}
-                                        >
-                                            <Text fontSize='14px'>Start Session</Text>
-                                        </Button>
-                                    }
-                                    {(isActive && !isPaused) && 
-                                        <Button 
-                                            size="sm" 
-                                            bg="white" 
-                                            aria-label="stop-stopwatch" 
-                                            leftIcon={<Icon as={FaPause}/>}
-                                            onClick={handleStopwatchPauseResume}
-                                        >
-                                            <Text fontSize='14px'>Pause Session</Text>
-                                        </Button>
-                                    }
-                                    {(isActive && isPaused) && 
-                                        <Button 
-                                            size="sm" 
-                                            bg="white" 
-                                            aria-label="stop-stopwatch" 
-                                            leftIcon={<Icon as={HiPlayPause} boxSize="1.5em"/>}
-                                            onClick={handleStopwatchPauseResume}
-                                        >
-                                            <Text fontSize='14px'>Resume Session</Text>
-                                        </Button>
-                                    }
-                                    {(isActive && isPaused) && 
-                                        <Button 
-                                            size="sm" 
-                                            bg="green.200" 
-                                            aria-label="stop-stopwatch" 
-                                            leftIcon={<Icon as={FaCheck}/>}
-                                            onClick={handleStopwatchCompletion}
-                                        >
-                                            <Text fontSize='14px'>Complete Session</Text>
-                                        </Button>
-                                    }
-                                </HStack>
-                            </Flex>
-                        </CardBody>
-                    </Card>
+                    { !task.completed &&
+                        <Card bg="blue.50" size="lg" w="400px">
+                            <CardBody justify="space-between">
+                                <Flex direction="column" align="center" justify="space-between">
+                                    <Text as="b" fontSize="3xl" mb="7px">
+                                        {("0" + Math.floor(time / 3600)).slice(-2)}:
+                                        {("0" + Math.floor((time / 60) % 60)).slice(-2)}:
+                                        {("0" + (time % 60)).slice(-2)}
+                                    </Text>
+                                    <HStack>
+                                        {!isActive && 
+                                            <Button size="sm" bg="white" aria-label="start-stopwatch" leftIcon={<Icon as={FaPlay}/>}
+                                                onClick={handleStopwatchStart}
+                                            >
+                                                <Text fontSize='14px'>Start Session</Text>
+                                            </Button>
+                                        }
+                                        {(isActive && !isPaused) && 
+                                            <Button 
+                                                size="sm" 
+                                                bg="white" 
+                                                aria-label="stop-stopwatch" 
+                                                leftIcon={<Icon as={FaPause}/>}
+                                                onClick={handleStopwatchPauseResume}
+                                            >
+                                                <Text fontSize='14px'>Pause Session</Text>
+                                            </Button>
+                                        }
+                                        {(isActive && isPaused) && 
+                                            <Button 
+                                                size="sm" 
+                                                bg="white" 
+                                                aria-label="stop-stopwatch" 
+                                                leftIcon={<Icon as={HiPlayPause} boxSize="1.5em"/>}
+                                                onClick={handleStopwatchPauseResume}
+                                            >
+                                                <Text fontSize='14px'>Resume Session</Text>
+                                            </Button>
+                                        }
+                                        {(isActive && isPaused) && 
+                                            <Button 
+                                                size="sm" 
+                                                bg="green.200" 
+                                                aria-label="stop-stopwatch" 
+                                                leftIcon={<Icon as={FaCheck}/>}
+                                                onClick={handleStopwatchCompletion}
+                                            >
+                                                <Text fontSize='14px'>Complete Session</Text>
+                                            </Button>
+                                        }
+                                    </HStack>
+                                </Flex>
+                            </CardBody>
+                        </Card>
+                    }
             </Flex>
             <Heading as="h2" size="lg" mt="2%">Working Session Log</Heading>
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
