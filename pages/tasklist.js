@@ -1,5 +1,5 @@
 import { SmallAddIcon, ChevronRightIcon, InfoIcon, CheckIcon } from "@chakra-ui/icons";
-import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container } from "@chakra-ui/react";
 import {
     Modal,
     ModalOverlay,
@@ -19,7 +19,7 @@ import Table from "@components/Table";
 import NoTasks from "@components/tasks/NoTasks";
 import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
-import calculateDateDifference from "src/utils/dateCalc"
+import { calculateDateDifference } from "src/utils/dateUtils"
 
 export default function Tasklist(props) {
 
@@ -143,8 +143,6 @@ export default function Tasklist(props) {
     }
 
     const renderErrorToast = () => {
-        console.log("message = ", message)
-        let description = ""
         if (message === "invalid_data") {
             description = "Invalid task id, please use the 'Open Task' buttons on the table below."
         }
@@ -163,18 +161,14 @@ export default function Tasklist(props) {
             Header: '',
             id: 'checkbox',
             accessor: (row) => row,
-            width: 100,
-            minWidth: 100,
-            maxWidth: 100,
-            Cell: ({ value }) => {
+            Cell: ({ }) => {
                 return (
                 <>  
                     <Button 
                         leftIcon={<CheckIcon />} 
                         colorScheme="blue"
-                        variant="ghost"
-                        ml="5%">
-                        Mark Complete
+                        variant="ghost">
+                        <Text fontSize='14px'>Mark Complete</Text>
                     </Button>
                     {/* <Checkbox background='white' size='lg'> Mark as Completed</Checkbox> */}
                 </>
@@ -184,9 +178,6 @@ export default function Tasklist(props) {
         {
             Header: 'Task',
             accessor: 'taskName',
-            width: 150,
-            minWidth: 100,
-            maxWidth: 180,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -198,11 +189,7 @@ export default function Tasklist(props) {
         {
             Header: 'Course',
             accessor: 'course',
-            width: 100,
-            minWidth: 100,
-            maxWidth: 180,
             Cell: ({ value }) => {
-                console.log(value)
                 let bgColor = value.colourCode;
                 if ( bgColor === null) {
                     bgColor = "gray.300"
@@ -210,7 +197,7 @@ export default function Tasklist(props) {
                 return (
                 <>
                     <Tag backgroundColor={bgColor} textColor="white">
-                        {`${value.courseName}`}
+                        <Text fontSize='14px'>{value.courseName}</Text>
                     </Tag>
                 </>
                 );
@@ -219,9 +206,6 @@ export default function Tasklist(props) {
         {
             Header: 'Due Date',
             accessor: 'dueDate',
-            width: 180,
-            minWidth: 180,
-            maxWidth: 180,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -238,9 +222,6 @@ export default function Tasklist(props) {
         {
             Header: 'Predicted Effort',
             accessor: 'effortRating',
-            width: 100,
-            minWidth: 100,
-            maxWidth: 180,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -255,9 +236,6 @@ export default function Tasklist(props) {
             Header: 'Estimated Time',
             accessor: 'effortRating',
             id: "time_estimate",
-            width: 180,
-            minWidth: 180,
-            maxWidth: 180,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -271,9 +249,6 @@ export default function Tasklist(props) {
         {
             Header: 'Actual Time',
             accessor: 'sessions',
-            width: 100,
-            minWidth: 100,
-            maxWidth: 180,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -287,18 +262,18 @@ export default function Tasklist(props) {
          {
             Header: '',
             accessor: 'id',
-            width: 180,
-            minWidth: 180,
-            maxWidth: 180,
+            width: 150,
+            minWidth: 150,
+            maxWidth: 150,
             Cell: ({ value }) => {
                 return (
                 <>
                     <Link href={`/task/${value}`}>
                         <Button 
-                            rightIcon={<ChevronRightIcon boxSize="1.5em"/>} 
-                            size="md" 
+                            rightIcon={<ChevronRightIcon/>} 
+                            size="md"
                             colorScheme="blue">
-                            Open Task
+                            <Text fontSize='14px'>Open Task</Text>
                         </Button>
                     </Link>
                 </>
@@ -309,9 +284,9 @@ export default function Tasklist(props) {
             Header: '',
             accessor: (row) => row,
             id: 'editColumn',
-            width: 20,
-            minWidth: 20,
-            maxWidth: 20,
+            width: 15,
+            minWidth: 15,
+            maxWidth: 15,
             sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
@@ -330,9 +305,9 @@ export default function Tasklist(props) {
             Header: '',
             accessor: (row) => row,
             id: 'deleteColumn',
-            width: 20,
-            minWidth: 20,
-            maxWidth: 20,
+            width: 15,
+            minWidth: 15,
+            maxWidth: 15,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -349,7 +324,7 @@ export default function Tasklist(props) {
     ]
 
     return (
-        <Box px="5%">
+        <Container maxW='container.xl'>
             <Flex pt="5%">
                 <Heading as="h1" size="2xl">
                     {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}&apos;s Task List
@@ -450,20 +425,17 @@ export default function Tasklist(props) {
                         <Table 
                             columns={COLUMNS} 
                             data={tasks}
-                            borderSpacing='0 15px'
-
                         />
                     </Box>  
                 )
             }
-        </Box>
+        </Container>
     );
 }
 
 
 export async function getServerSideProps(context) {
     const session = await getSession(context);
-    console.log("session=getServerSideProps(context) in login: ", session)
 
     // Get the courses associated with this user
     const courses = await prisma.course.findMany({where: {userId: session.id}})

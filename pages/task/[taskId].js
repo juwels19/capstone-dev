@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Card, CardBody, CardHeader, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Card, CardBody, CardHeader, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure, Container, VStack, HStack, CardFooter, Center, Grid, GridItem } from "@chakra-ui/react";
 import {
     Modal, ModalOverlay, ModalContent, ModalHeader, FormControl, FormLabel, Input, Textarea, Tag
 } from "@chakra-ui/react"
@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 
 import prisma from "@prisma/index";
-import calculateDateDifference from "src/utils/dateCalc"
+import {calculateDateDifference, getHMSfromDuration} from "src/utils/dateUtils"
 
 import EditSessionModal from "@components/sessions/EditSessionModal";
 import DeleteSessionModal from "@components/sessions/DeleteSessionModal";   
@@ -65,12 +65,11 @@ export default function TaskDetails(props) {
             numSessions++;
             totalDuration += session.duration;
         }
-        totalDuration = (totalDuration / 3600).toFixed(2);
         if (numSessions === 0) {
             setAverageSessionTime(0.0)
         } else {
-            let avgSessionTimeHours = (totalDuration / numSessions).toFixed(2);
-            setAverageSessionTime(avgSessionTimeHours)
+            let avgSessionTime = (totalDuration / numSessions).toFixed(2);
+            setAverageSessionTime(avgSessionTime)
         }
         setTotalSessionTime(totalDuration)
         setTotalSessions(numSessions)
@@ -181,6 +180,14 @@ export default function TaskDetails(props) {
         }
     }
 
+    const getTimeDisplay = (hours, minutes, seconds) => {
+        return (
+            hours ? `${hours.toFixed(0)}h ${minutes.toFixed(0)}m` : 
+            minutes ? `${minutes.toFixed(0)}m ${seconds.toFixed(0)}s` :
+            `${seconds.toFixed(0)}s`
+        )
+    }
+
     const productivityRatingOptions = [
         {value: 1, label: 1},
         {value: 2, label: 2},
@@ -191,11 +198,8 @@ export default function TaskDetails(props) {
 
     const COLUMNS = [
         {
-            Header: 'Date',
+            Header: '',
             accessor: 'startDateTime',
-            width: 30,
-            minWidth: 30,
-            maxWidth: 60,
             Cell: ({ value }) => {
                 const options = {month: "short", year: 'numeric', day: "numeric"}
                 return (
@@ -206,30 +210,15 @@ export default function TaskDetails(props) {
             },
         },
         {
-            Header: 'Time Started',
-            accessor: 'startDatetime',
-            width: 30,
-            minWidth: 30,
-            maxWidth: 60,
+            Header: 'Time',
+            accessor: (row) => row,
+            id: "time",
             Cell: ({ value }) => {
+                const startDate = new Date(value.startDateTime)
+                const endDate = new Date(startDate.getTime() + value.duration * 1000)
                 return (
                 <>
-                    <Text>{value}</Text>
-                </>
-                );
-            },
-        },
-        {
-            Header: 'Time Ended',
-            id: 'huh',
-            accessor: 'duration',
-            width: 30,
-            minWidth: 30,
-            maxWidth: 60,
-            Cell: ({ value }) => {
-                return (
-                <>
-                    <Text>{value}</Text>
+                    <Text>{startDate.toLocaleTimeString()} - {endDate.toLocaleTimeString()}</Text>
                 </>
                 );
             },
@@ -237,23 +226,14 @@ export default function TaskDetails(props) {
         {
             Header: 'Duration',
             accessor: 'duration',
-            width: 30,
-            minWidth: 30,
-            maxWidth: 60,
             Cell: ({ value }) => {
-                return (
-                <>
-                    <Text>{value}</Text>
-                </>
-                );
+                const [hours, minutes, seconds] = getHMSfromDuration(value)
+                return <Text>{getTimeDisplay(hours, minutes, seconds)}</Text>;
             },
         },
         {
             Header: 'Productivity Rating',
             accessor: 'productivityRating',
-            width: 30,
-            minWidth: 30,
-            maxWidth: 60,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -265,9 +245,6 @@ export default function TaskDetails(props) {
         {
             Header: 'Notes',
             accessor: 'notes',
-            width: 80,
-            minWidth: 100,
-            maxWidth: 100,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -280,9 +257,9 @@ export default function TaskDetails(props) {
             Header: '',
             id: 'editSession',
             accessor: (row) => row,
-            width: 10,
-            minWidth: 10,
-            maxWidth: 10,
+            width: 20,
+            minWidth: 20,
+            maxWidth: 20,
             sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
@@ -296,9 +273,9 @@ export default function TaskDetails(props) {
             Header: '',
             accessor: 'id',
             id: 'deleteSession',
-            width: 10,
-            minWidth: 10,
-            maxWidth: 10,
+            width: 20,
+            minWidth: 20,
+            maxWidth: 20,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -310,7 +287,7 @@ export default function TaskDetails(props) {
     ]
 
     return (
-        <Box px="5%" pt="2%" width="100vw">
+        <Container maxW='container.xl' pt="2%">
             <Modal size="2xl" isOpen={createSessionIsOpen} onClose={createSessionOnClose}>
                 <ModalOverlay />
                 <ModalContent>
@@ -385,78 +362,92 @@ export default function TaskDetails(props) {
                 <Text as="b" ml="2%">Estimated Time:</Text>
                 <Text ml="0.5%">{effortValueToLabel[task.effortRating]}</Text>
             </Flex>
-            <Flex mx="1%" mt="3%" justify="space-evenly">
-                <Card bg="blue.50" size="lg">
-                    <CardBody>
-                        <Flex>
-                            <Stack align="center">
-                                <Text align="center" as="b" fontSize="xl">Total Time Spent (hours)</Text>
-                                <Text as="b" fontSize="3xl">{totalSessionTime}</Text>
-                            </Stack>
-                            <Stack align="center" mx="2%">
-                                <Text align="center" as="b" fontSize="xl">Number of Sessions</Text>
-                                <Text as="b" fontSize="3xl">{totalSessions}</Text>
-                            </Stack>
-                            <Stack align="center">
-                                <Text align="center" as="b" fontSize="xl">Average Session Time (hours)</Text>
-                                <Text as="b" fontSize="3xl">{averageSessionTime}</Text>
-                            </Stack>
-                        </Flex>
-                    </CardBody>
-                </Card>
-                <Card bg="blue.50" size="md" minWidth="25%">
-                    <CardBody  px="4%">
-                        <Stack align="center">
-                            <Text align="center" as="b" fontSize="4xl">
-                                {("0" + Math.floor(time / 3600)).slice(-2)}:
-                                {("0" + Math.floor((time / 60) % 60)).slice(-2)}:
-                                {("0" + (time % 60)).slice(-2)}
-                            </Text>
-                            <ButtonGroup>
-                                {!isActive && 
-                                    <Button size="md" bg="white" aria-label="start-stopwatch" leftIcon={<Icon as={FaPlay}/>}
-                                        onClick={handleStopwatchStart}
-                                    >Start Timer</Button>
-                                }
-                                {(isActive && !isPaused) && 
-                                    <Button 
-                                        size="md" 
-                                        bg="white" 
-                                        aria-label="stop-stopwatch" 
-                                        leftIcon={<Icon as={FaPause}/>}
-                                        onClick={handleStopwatchPauseResume}
-                                    >Pause Timer</Button>
-                                }
-                                {(isActive && isPaused) && 
-                                    <Button 
-                                        size="md" 
-                                        bg="white" 
-                                        aria-label="stop-stopwatch" 
-                                        leftIcon={<Icon as={HiPlayPause} boxSize="1.5em"/>}
-                                        onClick={handleStopwatchPauseResume}
-                                    >Resume Timer</Button>
-                                }
-                            </ButtonGroup>
-                            {(isActive && isPaused) && 
-                                <Button 
-                                    size="md" 
-                                    bg="green.200" 
-                                    aria-label="stop-stopwatch" 
-                                    leftIcon={<Icon as={FaCheck}/>}
-                                    onClick={handleStopwatchCompletion}
-                                >Complete Session</Button>
-                            }
-                        </Stack>
-                    </CardBody>
-                </Card>
+            <Flex mt="3%" justify="space-between">
+                    <Card bg="blue.50" size="lg">
+                        <CardBody>
+                            <Grid templateColumns='repeat(3, 1fr)' gap={8}>
+                                <GridItem w="100%">
+                                    <VStack justifyContent="space-between">
+                                        <Text align="center" as="b" fontSize="xl">Total Time Spent</Text>
+                                        <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(totalSessionTime))}</Text>
+                                    </VStack>
+                                </GridItem>
+                                <GridItem w="100%">
+                                    <VStack>
+                                        <Text align="center" as="b" fontSize="xl">Number of Sessions</Text>
+                                        <Text as="b" fontSize="3xl">{totalSessions}</Text>
+                                    </VStack>
+                                </GridItem>
+                                <GridItem w="100%">
+                                    <VStack>
+                                        <Text align="center" as="b" fontSize="xl">Average Session Time</Text>
+                                        <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(averageSessionTime))}</Text>
+                                    </VStack>
+                                </GridItem>
+                            </Grid>
+                        </CardBody>
+                    </Card>
+                    <Card bg="blue.50" size="lg" w="400px">
+                        <CardBody justify="space-between">
+                            <Flex direction="column" align="center" justify="space-between">
+                                <Text as="b" fontSize="3xl" mb="7px">
+                                    {("0" + Math.floor(time / 3600)).slice(-2)}:
+                                    {("0" + Math.floor((time / 60) % 60)).slice(-2)}:
+                                    {("0" + (time % 60)).slice(-2)}
+                                </Text>
+                                <HStack>
+                                    {!isActive && 
+                                        <Button size="sm" bg="white" aria-label="start-stopwatch" leftIcon={<Icon as={FaPlay}/>}
+                                            onClick={handleStopwatchStart}
+                                        >
+                                            <Text fontSize='14px'>Start Session</Text>
+                                        </Button>
+                                    }
+                                    {(isActive && !isPaused) && 
+                                        <Button 
+                                            size="sm" 
+                                            bg="white" 
+                                            aria-label="stop-stopwatch" 
+                                            leftIcon={<Icon as={FaPause}/>}
+                                            onClick={handleStopwatchPauseResume}
+                                        >
+                                            <Text fontSize='14px'>Pause Session</Text>
+                                        </Button>
+                                    }
+                                    {(isActive && isPaused) && 
+                                        <Button 
+                                            size="sm" 
+                                            bg="white" 
+                                            aria-label="stop-stopwatch" 
+                                            leftIcon={<Icon as={HiPlayPause} boxSize="1.5em"/>}
+                                            onClick={handleStopwatchPauseResume}
+                                        >
+                                            <Text fontSize='14px'>Resume Session</Text>
+                                        </Button>
+                                    }
+                                    {(isActive && isPaused) && 
+                                        <Button 
+                                            size="sm" 
+                                            bg="green.200" 
+                                            aria-label="stop-stopwatch" 
+                                            leftIcon={<Icon as={FaCheck}/>}
+                                            onClick={handleStopwatchCompletion}
+                                        >
+                                            <Text fontSize='14px'>Complete Session</Text>
+                                        </Button>
+                                    }
+                                </HStack>
+                            </Flex>
+                        </CardBody>
+                    </Card>
             </Flex>
-            <Heading as="h2" size="lg" mt="3%">Working Session Log</Heading>
+            <Heading as="h2" size="lg" mt="2%">Working Session Log</Heading>
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
             {
                 sessions.length === 0 
                 ? <NoSessions />
                 : (
-                    <Box padding="3% 0 0 0">
+                    <Box padding="1% 0 0 0">
                         <Table 
                             columns={COLUMNS} 
                             data={sessions}
@@ -466,7 +457,7 @@ export default function TaskDetails(props) {
                     </Box>  
                 )
             }
-        </Box>
+        </Container>
     );
 }
 

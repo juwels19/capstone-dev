@@ -1,5 +1,5 @@
 
-export default function calculateDateDifference(dueDate) {
+export const calculateDateDifference = (dueDate) => {
     const msInDay = 86400000;
     let currDate = Date.now()
     // Convert the due date string to milliseconds for comparison
@@ -22,4 +22,13 @@ export default function calculateDateDifference(dueDate) {
         }
     }
 
+}
+
+export const getHMSfromDuration = (durationSeconds) => {
+    const totalMinutes = Math.floor(durationSeconds / 60);
+    const seconds = durationSeconds % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return [hours, minutes, seconds]
 }

@@ -8,7 +8,6 @@ const Table = {
       textAlign: 'center',
     },
     td: {
-      fontSize: '16px',
       backgroundColor: '#EDF2F7',
       textAlign: 'center',
     },

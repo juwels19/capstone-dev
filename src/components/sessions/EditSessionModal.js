@@ -59,17 +59,9 @@ export default function EditSessionModal(props) {
                     <ModalHeader fontWeight="bold" fontSize="2xl">Edit Working Session Details</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormControl isRequired>
+                        <FormControl>
                             <FormLabel fontWeight="bold">Notes</FormLabel>
                             <Textarea onChange={(e) => setNotes(e.target.value)} value={notes}/>
-                            {/* <Input 
-                                width="100%" 
-                                variant="outline" 
-                                bg="white" 
-                                placeholder="Enter Session Notes"
-                                onChange={(e) => setNotes(e.target.value)}
-                                value={notes}
-                            /> */}
                         </ FormControl>
                         <FormControl isRequired>
                             <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>

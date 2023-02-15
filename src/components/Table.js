@@ -71,7 +71,8 @@ export default function Table(props){
                 {headerGroup.headers.map(column => (
                   <Th
                     paddingX="0"
-                    fontSize="16px"
+                    fontSize="14px"
+                    textColor="black"
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     width={column.width}
                     minWidth={column.minWidth}
