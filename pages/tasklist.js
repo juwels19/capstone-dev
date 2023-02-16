@@ -21,6 +21,8 @@ import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
 import { calculateDateDifference, getHMSfromDuration } from "src/utils/dateUtils"
 
+import ConfettiExplosion from 'react-confetti-explosion';
+
 export default function Tasklist(props) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -35,11 +37,16 @@ export default function Tasklist(props) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
-    const [tasks, setTasks] = useState(props.tasks)
+    const [tasks, setTasks] = useState(props.tasks);
 
     const [show, setShow] = useState(false);
 
-    const handleToggle = () => setShow(!show);
+    const [isExploding, setIsExploding] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsExploding(false), 3000);
+        return () => clearTimeout(timer);
+      }, [isExploding]);
 
     useEffect(() => {
         setTaskName("")
@@ -156,6 +163,9 @@ export default function Tasklist(props) {
         const body = {completed: isCompleted}
         await fetch (`/api/tasks/${task.id}`, {method: "POST", body: JSON.stringify(body)})
         await updateTasks("Edit");
+        if (isCompleted) {
+            setIsExploding(true)
+        }
     }
 
     const completedTasks = tasks.filter((task) => task.completed);
@@ -240,10 +250,17 @@ export default function Tasklist(props) {
             accessor: 'dueDate',
             id: "due_date",
             Cell: ({ value }) => {
+                const dateOptions = {
+                    timeZone: "UTC",
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric"
+                }
                 return (
                 <>
                     <Text as="b">
-                    {new Date(`${value}`).toDateString()}
+                        {new Date(`${value}`).toLocaleDateString("en-US", dateOptions)}
                     </Text>
                     <Text>
                         {calculateDateDifference(`${value}`)}
@@ -458,6 +475,7 @@ export default function Tasklist(props) {
             <Heading as="h2" size="lg">
                 Active Tasks
             </Heading>
+            {isExploding && <ConfettiExplosion force={0.4} duration={2000} particleCount={30} width={600} />}
             {
                 activeTasks.length === 0 
                 ? <NoTasks />
@@ -511,7 +529,13 @@ export async function getServerSideProps(context) {
                     duration: true
                 }
             }
-        }})
+        },
+        orderBy: {
+            course: {
+                courseName: "desc"
+            }
+        }
+    })
 
     if (!session) {
         return {

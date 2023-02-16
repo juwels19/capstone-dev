@@ -13,7 +13,12 @@ async function handler(req, res) {
                     }
                 }
             },
-            include: {course: true, sessions: true}
+            include: {course: true, sessions: true},
+            orderBy: {
+                course: {
+                    courseName: "desc"
+                }
+            }
         });
         res.status(201).json({ message: 'Task fetch complete', body: fetchRes, ...fetchRes});
     } else {

@@ -1,13 +1,13 @@
 
 export const calculateDateDifference = (dueDate) => {
     const msInDay = 86400000;
-    let currDate = Date.now()
+    let currDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
     // Convert the due date string to milliseconds for comparison
-    let dueDateNumeric = Date.parse(dueDate)
+    let dueDateNumeric = new Date(dueDate)
     const diff = dueDateNumeric - currDate;
     if (diff >= 0) {
         // Due date is more than a day in the future
-        const daysAway = Math.floor(diff / msInDay);
+        const daysAway = Math.ceil(diff / msInDay);
         if (daysAway > 1) {
             return `(due in ${daysAway} days)`;
         } else {
@@ -18,7 +18,7 @@ export const calculateDateDifference = (dueDate) => {
         if (daysAgo > 1) {
             return `(was due ${daysAgo} days ago)`
         } else {
-            return `(was due ${daysAgo} day ago)`
+            return `(due today)`
         }
     }
 

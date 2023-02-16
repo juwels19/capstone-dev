@@ -18,7 +18,7 @@ import {
     EditIcon
 } from '@chakra-ui/icons'
 import { Select, CreatableSelect } from "chakra-react-select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function EditTaskModal(props) {
     const {
@@ -53,6 +53,13 @@ export default function EditTaskModal(props) {
     const [courseSelected, setCourseSelected] = useState({label: task.course.courseName, value: task.course.courseName});
     const [effort, setEffort] = useState({value: task.effortRating, label: effortValueToLabel[task.effortRating]});
     const [dueDate, setDueDate] = useState(task.dueDate);
+
+    useEffect(() => {
+        setTaskName(task.taskName)
+        setCourseSelected({label: task.course.courseName, value: task.course.courseName})
+        setEffort({value: task.effortRating, label: effortValueToLabel[task.effortRating]})
+        setDueDate(task.dueDate)
+    }, [editTaskIsOpen])
 
     const handleEditTaskSubmit = async (event) => {
         event.preventDefault();
