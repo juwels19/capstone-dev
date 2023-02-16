@@ -3,7 +3,7 @@ import prisma from "@prisma/index"
 // api/sessions/new
 async function handler(req, res) {
     if (req.method === "POST") {
-        const { userId, taskId, startDateTime, duration, productivityRating, notes } = JSON.parse(req.body);
+        const { userId, taskId, startDateTime, duration, productivityRating, notes, location } = JSON.parse(req.body);
 
         const newSession = await prisma.session.create({
             data: {
@@ -20,7 +20,8 @@ async function handler(req, res) {
                 startDateTime: startDateTime,
                 duration: duration,
                 productivityRating: productivityRating,
-                notes: notes
+                notes: notes,
+                location: location
             }
         })
 

@@ -79,4 +79,5 @@ model Session {
   duration Int
   productivityRating Int
   notes String?
+  location String?
 }

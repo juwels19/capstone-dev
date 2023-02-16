@@ -9,12 +9,13 @@ async function handler(req, res) {
         res.status(201).json({ message: 'Session deleted successfully' });
     } else if (req.method === "POST") {
         // Task editing logic in here... The user will edit the information and click confirm in the modal
-        const { userId, productivityRating, notes } = JSON.parse(req.body);
+        const { userId, productivityRating, notes, location } = JSON.parse(req.body);
         await prisma.session.update({
             where: {id: parseInt(sessionId)},
             data: {
                 productivityRating: parseInt(productivityRating),
                 notes: notes,
+                location: location
             },
         })
         res.status(201).json({ message: 'Session edited successfully' });

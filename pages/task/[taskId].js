@@ -30,6 +30,7 @@ export default function TaskDetails(props) {
 
     const [startDateTime, setStartDateTime] = useState("");
     const [productivityRating, setProductivityRating] = useState(0);
+    const [location, setLocation] = useState("");
     const [notes, setNotes] = useState("");
 
     const [sessions, setSessions] = useState(props.sessions);
@@ -118,7 +119,8 @@ export default function TaskDetails(props) {
             startDateTime: startDateTime,
             duration: time,
             productivityRating: productivityRating,
-            notes: notes
+            notes: notes,
+            location: location
         }
 
         const sessionCreationRes = await fetch("/api/sessions/new", {method: "POST", body: JSON.stringify(body)});
@@ -196,6 +198,13 @@ export default function TaskDetails(props) {
         {value: 5, label: 5},
     ];
 
+    const locationOptions = [
+        {value: "In-Class", label: "In-Class"},
+        {value: "Library", label: "Library"},
+        {value: "Home", label: "Home"},
+        {value: "Other", label: "Other"},
+    ];
+
     const COLUMNS = [
         {
             Header: '',
@@ -234,6 +243,17 @@ export default function TaskDetails(props) {
         {
             Header: 'Productivity Rating',
             accessor: 'productivityRating',
+            Cell: ({ value }) => {
+                return (
+                <>
+                    <Text>{value}</Text>
+                </>
+                );
+            },
+        },
+        {
+            Header: 'Location',
+            accessor: 'location',
             Cell: ({ value }) => {
                 return (
                 <>
@@ -315,6 +335,17 @@ export default function TaskDetails(props) {
                                 placeholder="Select a Productivity Rating"
                                 options={productivityRatingOptions}
                                 onChange={(e) => setProductivityRating(e.value)}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <FormLabel mt="2%" fontWeight="bold">Location</FormLabel>
+                            <Select 
+                                width="50%" 
+                                variant="outline" 
+                                bg="white"
+                                placeholder="Select a location for your working session..."
+                                options={locationOptions}
+                                onChange={(e) => setLocation(e.value)}
                             />
                         </FormControl>
                         <FormControl>

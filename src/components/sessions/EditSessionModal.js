@@ -29,6 +29,7 @@ export default function EditSessionModal(props) {
 
     const { isOpen: editSessionIsOpen, onClose: editSessionOnClose, onOpen: editSessionOnOpen } = useDisclosure();
     const [productivityRating, setProductivityRating] = useState(session.productivityRating);
+    const [location, setLocation] = useState(session.location);
     const [notes, setNotes] = useState(session.notes);
 
     const productivityRatingOptions = [
@@ -39,12 +40,20 @@ export default function EditSessionModal(props) {
         {value: 5, label: 5},
     ];
 
+    const locationOptions = [
+        {value: "In-Class", label: "In-Class"},
+        {value: "Library", label: "Library"},
+        {value: "Home", label: "Home"},
+        {value: "Other", label: "Other"},
+    ];
+
     const handleEditSessionSubmit = async (event) => {
         event.preventDefault();
         const body = {
             userId: userId,
             productivityRating: productivityRating,
             notes: notes,
+            location: location
         }
         await fetch (`/api/sessions/${session.id}`, {method: "POST", body: JSON.stringify(body)})
         editSessionOnClose();
@@ -59,10 +68,6 @@ export default function EditSessionModal(props) {
                     <ModalHeader fontWeight="bold" fontSize="2xl">Edit Working Session Details</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormControl>
-                            <FormLabel fontWeight="bold">Notes</FormLabel>
-                            <Textarea onChange={(e) => setNotes(e.target.value)} value={notes}/>
-                        </ FormControl>
                         <FormControl isRequired>
                             <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>
                             <FormHelperText mb="1%">Rate how productive you felt your working session was. (DEFINE 1-5 MEANING)</FormHelperText>
@@ -76,6 +81,22 @@ export default function EditSessionModal(props) {
                                 value={{label: productivityRating, value: productivityRating}}
                             />
                         </FormControl>
+                        <FormControl>
+                            <FormLabel mt="2%" fontWeight="bold">Location</FormLabel>
+                            <Select 
+                                width="50%" 
+                                variant="outline" 
+                                bg="white"
+                                placeholder="Select a location for your working session..."
+                                options={locationOptions}
+                                onChange={(e) => setLocation(e.value)}
+                                value={{label: location, value: location}}
+                            />
+                        </FormControl>
+                        <FormControl>
+                            <FormLabel fontWeight="bold">Notes</FormLabel>
+                            <Textarea onChange={(e) => setNotes(e.target.value)} value={notes}/>
+                        </ FormControl>
                         <ButtonGroup sz="md" mt="5%" minWidth="100%">
                             <Button colorScheme="gray" onClick={editSessionOnClose} width="100%">
                                 Cancel
