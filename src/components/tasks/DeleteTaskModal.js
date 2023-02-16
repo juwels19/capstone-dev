@@ -15,14 +15,13 @@ import {
 import { FaTrash } from "react-icons/fa"
 
 export default function DeleteTaskModal(props) {
-    const task = props.task;
+    const { task, isDisabled=false } = props;
 
     const { isOpen: deleteTaskIsOpen, onOpen: deleteTaskOnOpen, onClose: deleteTaskOnClose } = useDisclosure();
 
 
     const deleteTaskHandler = async () => {
         //TODO add error handling here
-        console.log("inside delete modal handler")
         const deleteRes = await fetch(`/api/tasks/${task.id}`, {method: "DELETE"})
         deleteTaskOnClose();
         props.updateTaskHandler("Deletion");
@@ -60,6 +59,7 @@ export default function DeleteTaskModal(props) {
                 icon={<Icon as={FaTrash} />}
                 variant="ghost"
                 size='lg'
+                isDisabled={isDisabled}
             />
         </>
     );

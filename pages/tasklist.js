@@ -1,5 +1,5 @@
-import { SmallAddIcon, ChevronRightIcon, InfoIcon, CheckIcon, MinusIcon } from "@chakra-ui/icons";
-import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container } from "@chakra-ui/react";
+import { SmallAddIcon, ChevronRightIcon, InfoIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container, Divider } from "@chakra-ui/react";
 import {
     Modal,
     ModalOverlay,
@@ -17,8 +17,10 @@ import { Select, CreatableSelect } from "chakra-react-select";
 import prisma from "@prisma/index";
 import Table from "@components/Table";
 import NoTasks from "@components/tasks/NoTasks";
+import CompleteTaskModal from "@components/tasks/CompleteTaskModal";
 import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
+import BugReportHeader from "@components/BugReportHeader";
 import { calculateDateDifference, getHMSfromDuration } from "src/utils/dateUtils"
 
 import ConfettiExplosion from 'react-confetti-explosion';
@@ -26,6 +28,7 @@ import ConfettiExplosion from 'react-confetti-explosion';
 export default function Tasklist(props) {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+
     const toast = useToast();
     const searchParams = useSearchParams();
     const message = searchParams.get("message");
@@ -38,8 +41,6 @@ export default function Tasklist(props) {
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
     const [tasks, setTasks] = useState(props.tasks);
-
-    const [show, setShow] = useState(false);
 
     const [isExploding, setIsExploding] = useState(false);
 
@@ -158,33 +159,8 @@ export default function Tasklist(props) {
         }
     }
 
-    const handleChangeCompleteStatus = async (event, task, isCompleted) => {
-        event.preventDefault();
-        const body = {completed: isCompleted}
-        await fetch (`/api/tasks/${task.id}`, {method: "POST", body: JSON.stringify(body)})
-        await updateTasks("Edit");
-        if (isCompleted) {
-            setIsExploding(true)
-        }
-    }
-
     const completedTasks = tasks.filter((task) => task.completed);
     const activeTasks = tasks.filter((task) => !task.completed);
-
-
-    const renderErrorToast = () => {
-        if (message === "invalid_data") {
-            description = "Invalid task id, please use the 'Open Task' buttons on the table below."
-        }
-        // toast({
-        //     position: "top-middle",
-        //     title: "Task Error",
-        //     description: description,
-        //     status: "error",
-        //     duration: 3000,
-        //     isClosable: true
-        // })
-    }
 
     const COLUMNS = [
         {
@@ -194,25 +170,11 @@ export default function Tasklist(props) {
             Cell: ({ value }) => {
                 return (
                 <>  
-                    { value.completed ?
-                        <Button 
-                            leftIcon={<MinusIcon />} 
-                            colorScheme="red"
-                            variant="ghost"
-                            onClick={(event) => handleChangeCompleteStatus(event, value, false)}
-                        >
-                            <Text fontSize='14px'>Mark Active</Text>
-                        </Button>
-                        :
-                        <Button 
-                            leftIcon={<CheckIcon />} 
-                            colorScheme="blue"
-                            variant="ghost"
-                            onClick={(event) => handleChangeCompleteStatus(event, value, true)}
-                        >
-                            <Text fontSize='14px'>Mark Complete</Text>
-                        </Button>
-                    }
+                    <CompleteTaskModal
+                        task={value}
+                        updateTaskHandler={updateTasks}
+                        confettiHandler={setIsExploding}
+                    />
                 </>
                 );
             },
@@ -341,16 +303,13 @@ export default function Tasklist(props) {
             sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
-                <>
-                    { !value.completed &&
-                        <EditTaskModal
-                            task={value} 
-                            updateTaskHandler={updateTasks}
-                            courseOptions={courseOptions}
-                            handleCreateCourse={handleCreateCourse}
-                        />
-                    }
-                </>
+                    <EditTaskModal
+                        task={value} 
+                        updateTaskHandler={updateTasks}
+                        courseOptions={courseOptions}
+                        handleCreateCourse={handleCreateCourse}
+                        isDisabled={value.completed}
+                    />
                 );
             },
         },
@@ -363,16 +322,13 @@ export default function Tasklist(props) {
             maxWidth: 15,
             Cell: ({ value }) => {
                 return (
-                <>
-                    { !value.completed &&
-                        <DeleteTaskModal
-                            task={value} 
-                            updateTaskHandler={updateTasks}
-                            courseOptions={courseOptions}
-                            handleCreateCourse={handleCreateCourse}
-                        />
-                    }
-                </>
+                    <DeleteTaskModal
+                        task={value} 
+                        updateTaskHandler={updateTasks}
+                        courseOptions={courseOptions}
+                        handleCreateCourse={handleCreateCourse}
+                        isDisabled={false}
+                    />
                 );
             },
         },
@@ -385,13 +341,23 @@ export default function Tasklist(props) {
                     {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}&apos;s Task List
                 </Heading>
                 <Spacer/>
-                <ButtonGroup ml="2%">
+                <ButtonGroup ml="2%" alignItems="center">
                     <Button rightIcon={<SmallAddIcon boxSize="1.5em"/>}
                             size="md" 
                             colorScheme="teal"
                             onClick={onOpen}>
                         Create Task
                     </Button>
+                    <a 
+                        href="https://docs.google.com/document/d/14Q9OELTXoTvf7YjV_IWmaKr41ze2SHFNFBhw1KKV-i8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                            <Button
+                                size="md"
+                                colorScheme="blue"
+                                rightIcon={<ExternalLinkIcon />}
+                            >
+                                Help
+                            </Button>
+                    </a>
                     <Button size="md"
                             colorScheme="red"
                             onClick={() => signOut({callbackUrl: "/"})}>
@@ -399,7 +365,6 @@ export default function Tasklist(props) {
                     </Button>
                 </ButtonGroup>
             </Flex>
-
 
             <Modal size="2xl" isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
@@ -490,11 +455,12 @@ export default function Tasklist(props) {
             }
             {completedTasks.length > 0 && (
                 <>
+                    <Divider mt="2%" />
                     <Heading as="h2" size="lg" mt="2%">
                         Completed Tasks
                     </Heading>
                     <Table 
-                        columns={COLUMNS.filter((col) => col.id != "due_date")} 
+                        columns={COLUMNS} 
                         data={completedTasks}
                     />
                 </>

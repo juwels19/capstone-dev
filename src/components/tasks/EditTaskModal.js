@@ -27,6 +27,7 @@ export default function EditTaskModal(props) {
         updateTaskHandler,
         handleCreateCourse,
         courseOptions,
+        isDisabled=false,
     } = props;
 
     const effortOptions = [
@@ -149,6 +150,7 @@ export default function EditTaskModal(props) {
                 icon={<EditIcon />}
                 variant="ghost"
                 size='lg'
+                isDisabled={isDisabled}
             />
         </>
     );

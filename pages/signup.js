@@ -14,6 +14,8 @@ export default function Signup() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [confirmPasswordInvalid, setConfirmPasswordInvalid] = useState(false);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const toast = useToast();
     
 
@@ -25,7 +27,7 @@ export default function Signup() {
             setConfirmPasswordInvalid(true);
             return
         }
-
+        setIsLoading(true)
         let body = {
             firstName: firstName,
             lastName: lastName,
@@ -35,16 +37,9 @@ export default function Signup() {
 
         let signupRes = await fetch("/api/auth/signup", {method: "POST", body: JSON.stringify(body)})
         if (signupRes.ok) {
-            // Sign in the user once they create their account
-            toast({
-                position: "top-middle",
-                title: "Signup Successful!",
-                status: "success",
-                duration: 9000,
-                isClosable: true
-            });
             signIn("credentials", {email: email, password: password, callbackUrl: "/tasklist"})
         } else {
+            setIsLoading(false);
             let body = await signupRes.json()
             toast({
                 position: "top-middle",
@@ -155,7 +150,14 @@ export default function Signup() {
                                 <FormErrorMessage >Please make sure passwords match.</FormErrorMessage>
                             }
                         </FormControl>
-                        <Button type="submit" width="100%" colorScheme="blue" size="md" marginTop="20px">
+                        <Button 
+                            type="submit" 
+                            width="100%" 
+                            colorScheme="blue" 
+                            size="md" 
+                            marginTop="20px" 
+                            isLoading={isLoading}
+                        >
                             Signup
                         </Button>
                     </form>

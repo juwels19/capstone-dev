@@ -1,7 +1,7 @@
-import { Center, Button, ButtonGroup, Card, CardBody, CardFooter, Text } from "@chakra-ui/react";
+import { Center, Button, ButtonGroup, Card, CardBody, CardFooter, Text, VStack} from "@chakra-ui/react";
 import Image from "next/image";
 import { getSession } from "next-auth/react";
-import timeifyLogo from "../public/timeify_logo.png";
+import timeifyLogo from "public/timeify.svg"
 import { useRouter } from 'next/router'
 
 export default function Home() {
@@ -9,15 +9,16 @@ export default function Home() {
     const router = useRouter();
 
     return (
-            <Center height="calc(100vh)">
-              <Card size="lg" colorScheme="gray" variant="filled" align="center" justify="center">
+            <Center h="80vh">
+              <Card size="lg" variant="ghost" align="center" justify="center">
                   <CardBody>
-                      <Image src={timeifyLogo} alt="timely logo"/>
-                      <Text className="font-bold" mt="2%">
-                          Manage, understand, and improve your time management skills through self-monitoring
-                      </Text>
+                      <Image src={timeifyLogo} alt="timeify logo"/>
                   </CardBody>
                   <CardFooter>
+                    <VStack>
+                      <Text align="center" as="b" mb="5%">
+                          Manage, understand, and improve your time management skills through self-monitoring
+                      </Text>
                       <ButtonGroup colorScheme="blue" size="lg" gap="100">
                           <Button width="200px" onClick={() => router.push("/login")}>
                               Login
@@ -26,6 +27,7 @@ export default function Home() {
                               Signup
                           </Button>
                       </ButtonGroup>
+                    </VStack>
                   </CardFooter>
               </Card>
             </Center>
@@ -43,5 +45,7 @@ export async function getServerSideProps(context) {
             }
           };
     }
-    return {};
+    return {
+        props: {}
+    };
 }

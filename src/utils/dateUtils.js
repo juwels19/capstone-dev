@@ -11,13 +11,15 @@ export const calculateDateDifference = (dueDate) => {
         if (daysAway > 1) {
             return `(due in ${daysAway} days)`;
         } else {
-            return `(due in ${daysAway} day)`;
+            return `(due tomorrow)`;
         }
     } else {
-        const daysAgo = Math.abs(Math.floor(diff / msInDay)) - 1;
+        const daysAgo = Math.abs(Math.ceil(diff / msInDay));
         if (daysAgo > 1) {
             return `(was due ${daysAgo} days ago)`
-        } else {
+        } else if (daysAgo == 1) {
+            return `(was due yesterday)`
+        }else {
             return `(due today)`
         }
     }

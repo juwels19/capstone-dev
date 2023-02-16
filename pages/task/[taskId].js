@@ -1,10 +1,11 @@
-import { Box, Button, ButtonGroup, Card, CardBody, CardHeader, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure, Container, VStack, HStack, CardFooter, Center, Grid, GridItem } from "@chakra-ui/react";
+import { Box, Button, ButtonGroup, Card, CardBody, CardHeader, Flex, FormHelperText, Heading, Icon, ModalBody, ModalCloseButton, Stack, Text, useDisclosure, Container, VStack, HStack, CardFooter, Center, Grid, GridItem, Spacer } from "@chakra-ui/react";
 import {
     Modal, ModalOverlay, ModalContent, ModalHeader, FormControl, FormLabel, Input, Textarea, Tag
 } from "@chakra-ui/react"
 import { Select } from "chakra-react-select";
 import { getSession } from "next-auth/react";
 import { FaArrowLeft, FaPlay, FaPause, FaCheck } from "react-icons/fa"
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { HiPlayPause } from "react-icons/hi2";
 import { useRouter } from 'next/router'
 import { useState, useEffect } from "react";
@@ -375,9 +376,22 @@ export default function TaskDetails(props) {
             >
                 <Text color="black">Back to Tasklist</Text>
             </Button>
-            <Heading as="h1" size="xl" pt="1%">
-                Task Details
-            </Heading>
+            <Flex alignItems="flex-end">
+                <Heading as="h1" size="xl" pt="1%">
+                    Task Details
+                </Heading>
+                <Spacer />
+                <a 
+                    href="https://docs.google.com/document/d/14Q9OELTXoTvf7YjV_IWmaKr41ze2SHFNFBhw1KKV-i8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    <Button
+                        size="md"
+                        colorScheme="blue"
+                        rightIcon={<ExternalLinkIcon />}
+                    >
+                        Help
+                    </Button>
+                </a>
+            </Flex>
             <Flex mt="2%">
                 <Text as="b">Task Name:</Text>
                 <Text ml="0.5%">{task.taskName}</Text>

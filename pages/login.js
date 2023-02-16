@@ -10,6 +10,7 @@ export default function Login() {
     const [show, setShow] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false)
     const handleClick = () => setShow(!show);
 
     const toast = useToast();
@@ -17,23 +18,22 @@ export default function Login() {
     
 
     const handleSubmit = async (event) => {
+        setIsLoading(true)
         event.preventDefault();
-        await signIn("credentials", {email: email, password: password, redirect: false}).then(
-            ({ok}) => {
-                if (ok) {
-                    router.push("/tasklist")
-                } else {
-                    toast({
-                        position: "top-middle",
-                        title: "Login Failed",
-                        description: "The email and/or password entered is incorrect.",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true
-                    });
-                }
-            }
-        );
+        const { ok } = await signIn("credentials", {email: email, password: password, redirect: false})
+        if (ok) {
+            router.push("/tasklist")
+        } else {
+            setIsLoading(false)
+            toast({
+                position: "top-middle",
+                title: "Login Failed",
+                description: "The email and/or password entered is incorrect.",
+                status: "error",
+                duration: 3000,
+                isClosable: true
+            });
+        }
     }
 
     return (
@@ -76,7 +76,7 @@ export default function Login() {
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
-                            <Button type="submit" width="100%" colorScheme="blue" size="md" marginTop="20px">
+                            <Button type="submit" width="100%" colorScheme="blue" size="md" marginTop="20px" isLoading={isLoading}>
                                 Login
                             </Button>
                         </FormControl>

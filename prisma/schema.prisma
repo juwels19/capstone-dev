@@ -65,6 +65,9 @@ model Task {
   numSessions Int?
   avgSessionTime Float?
   completed Boolean @default(false)
+  relativeProductivity Int?
+  blindEstimationChange Int?
+  actualEstimationChange Int?
   sessions Session[]
 }
 
