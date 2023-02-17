@@ -33,19 +33,15 @@ export default function EditSessionModal(props) {
     const [notes, setNotes] = useState(session.notes);
 
     const productivityRatingOptions = [
-        {value: 1, label: "I finished a lot less than I expected to"},
-        {value: 2, label: "I finished a bit less than I expected to"},
-        {value: 3, label: "I finished exactly what I expected to"},
-        {value: 4, label: "I finished a bit more than I expected to"},
-        {value: 5, label: "I finished a lot more than I expected to"},
+        {value: 1, label: "I finished less than I expected to"},
+        {value: 2, label: "I finished exactly what I expected to"},
+        {value: 3, label: "I finished more than I expected to"},
     ];
 
     const productivityRatingToLabel = {
-        1: "I finished a lot less than I expected to",
-        2: "I finished a bit less than I expected to",
-        3: "I finished exactly what I expected to",
-        4: "I finished a bit more than I expected to",
-        5: "I finished a lot more than I expected to",
+        1: "I finished less than I expected to",
+        2: "I finished exactly what I expected to",
+        3: "I finished more than I expected to",
     }
 
     const locationOptions = [

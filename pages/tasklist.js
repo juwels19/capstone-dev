@@ -398,12 +398,13 @@ export default function Tasklist(props) {
                             />
                         </FormControl>
                         <FormControl mt="2%" isRequired>
-                            <HStack spacing={0.5}>
+                            <FormLabel fontWeight="bold">Estimated Effort</FormLabel>
+                            {/* <HStack spacing={0.5}>
                                 <FormLabel fontWeight="bold">Estimated Effort</FormLabel>
-                                {/* <Tooltip label="This is a test tooltip" >
+                                <Tooltip label="This is a test tooltip" >
                                     <InfoIcon />
-                                </Tooltip> */}
-                            </HStack>
+                                </Tooltip>
+                            </HStack> */}
                             
                             <FormHelperText mb="1%">To help you start estimating time and effort, select a range that you think fits best.</FormHelperText>
                             <Select 
