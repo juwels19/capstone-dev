@@ -10,7 +10,7 @@ async function handler(req, res) {
         res.status(201).json({ message: 'Task deleted successfully' });
     } else if (req.method === "POST") {
         // Task editing logic in here... The user will edit the information and click confirm in the modal
-        const { userId, taskName, courseSelected, effortRating, dueDate, completed, relativeProductivity, blindEstimationChange, actualEstimationChange} = JSON.parse(req.body);        
+        const { userId, taskName, courseSelected, effortRating, dueDate, completed, relativeProductivity, blindEstimationChange, actualEstimationChange, notes } = JSON.parse(req.body);        
         const findCourseRes = courseSelected ? await prisma.course.findFirst({where: {courseName: courseSelected, userId: userId}}) : undefined
 
         console.log(relativeProductivity, blindEstimationChange, actualEstimationChange)
@@ -29,6 +29,7 @@ async function handler(req, res) {
                 relativeProductivity: relativeProductivity,
                 blindEstimationChange: blindEstimationChange,
                 actualEstimationChange: actualEstimationChange,
+                notes: notes
             }
         })
         res.status(201).json({ message: 'Task edited successfully' });

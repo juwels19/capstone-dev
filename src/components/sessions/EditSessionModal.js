@@ -33,12 +33,20 @@ export default function EditSessionModal(props) {
     const [notes, setNotes] = useState(session.notes);
 
     const productivityRatingOptions = [
-        {value: 1, label: 1},
-        {value: 2, label: 2},
-        {value: 3, label: 3},
-        {value: 4, label: 4},
-        {value: 5, label: 5},
+        {value: 1, label: "I finished a lot less than I expected to"},
+        {value: 2, label: "I finished a bit less than I expected to"},
+        {value: 3, label: "I finished exactly what I expected to"},
+        {value: 4, label: "I finished a bit more than I expected to"},
+        {value: 5, label: "I finished a lot more than I expected to"},
     ];
+
+    const productivityRatingToLabel = {
+        1: "I finished a lot less than I expected to",
+        2: "I finished a bit less than I expected to",
+        3: "I finished exactly what I expected to",
+        4: "I finished a bit more than I expected to",
+        5: "I finished a lot more than I expected to",
+    }
 
     const locationOptions = [
         {value: "In-Class", label: "In-Class"},
@@ -70,7 +78,7 @@ export default function EditSessionModal(props) {
                     <ModalBody>
                         <FormControl isRequired>
                             <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>
-                            <FormHelperText mb="1%">Rate how productive you felt your working session was. (DEFINE 1-5 MEANING)</FormHelperText>
+                            <FormHelperText mb="1%">Rate how productive you felt your working session was:</FormHelperText>
                             <Select 
                                 width="50%" 
                                 variant="outline" 
@@ -78,7 +86,7 @@ export default function EditSessionModal(props) {
                                 placeholder="Select a Productivity Rating"
                                 options={productivityRatingOptions}
                                 onChange={(e) => setProductivityRating(e.value)}
-                                value={{label: productivityRating, value: productivityRating}}
+                                value={{label: productivityRatingToLabel[productivityRating], value: productivityRating}}
                             />
                         </FormControl>
                         <FormControl>
@@ -93,7 +101,7 @@ export default function EditSessionModal(props) {
                                 value={{label: location, value: location}}
                             />
                         </FormControl>
-                        <FormControl>
+                        <FormControl mt="2%">
                             <FormLabel fontWeight="bold">Notes</FormLabel>
                             <Textarea onChange={(e) => setNotes(e.target.value)} value={notes}/>
                         </ FormControl>

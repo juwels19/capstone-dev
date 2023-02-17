@@ -68,6 +68,7 @@ model Task {
   relativeProductivity Int?
   blindEstimationChange Int?
   actualEstimationChange Int?
+  notes String?
   sessions Session[]
 }
 

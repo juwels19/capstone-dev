@@ -20,7 +20,6 @@ import NoTasks from "@components/tasks/NoTasks";
 import CompleteTaskModal from "@components/tasks/CompleteTaskModal";
 import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
-import BugReportHeader from "@components/BugReportHeader";
 import { calculateDateDifference, getHMSfromDuration } from "src/utils/dateUtils"
 
 import ConfettiExplosion from 'react-confetti-explosion';
@@ -33,10 +32,10 @@ export default function Tasklist(props) {
     const searchParams = useSearchParams();
     const message = searchParams.get("message");
 
-    const [taskName, setTaskName] = useState("");
+    const [taskName, setTaskName] = useState(null);
     const [courseSelected, setCourseSelected] = useState(null);
     const [effort, setEffort] = useState(0);
-    const [dueDate, setDueDate] = useState("");
+    const [dueDate, setDueDate] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
@@ -50,9 +49,9 @@ export default function Tasklist(props) {
       }, [isExploding]);
 
     useEffect(() => {
-        setTaskName("")
+        setTaskName(null)
         setEffort(0)
-        setDueDate("")
+        setDueDate(null)
         setCourseSelected(null)
     }, [isOpen])
 
@@ -116,7 +115,8 @@ export default function Tasklist(props) {
     
     const handleCreateTaskSubmit = async (event) => {
         event.preventDefault();
-        if (taskName, effort, !isNaN(Date.parse(dueDate)), courseSelected) {
+
+        if (taskName && effort && isNaN(Date.parse(dueDate)) && courseSelected) {
             // Data is valid for task creation
             let body = {
                 taskName: taskName,
@@ -174,6 +174,7 @@ export default function Tasklist(props) {
                         task={value}
                         updateTaskHandler={updateTasks}
                         confettiHandler={setIsExploding}
+                        getTimeDisplay={getTimeDisplay}
                     />
                 </>
                 );
@@ -399,10 +400,10 @@ export default function Tasklist(props) {
                         </FormControl>
                         <FormControl mt="2%" isRequired>
                             <HStack spacing={0.5}>
-                                <FormLabel fontWeight="bold">Effort</FormLabel>
-                                <Tooltip label="This is a test tooltip" >
+                                <FormLabel fontWeight="bold">Estimated Effort</FormLabel>
+                                {/* <Tooltip label="This is a test tooltip" >
                                     <InfoIcon />
-                                </Tooltip>
+                                </Tooltip> */}
                             </HStack>
                             
                             <FormHelperText mb="1%">To help you start estimating time and effort, select a range that you think fits best.</FormHelperText>

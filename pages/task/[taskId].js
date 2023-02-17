@@ -56,6 +56,7 @@ export default function TaskDetails(props) {
     useEffect(() => {
         setProductivityRating(0);
         setNotes("")
+        setLocation("")
     }, [createSessionIsOpen])
 
     useEffect(() => {
@@ -192,12 +193,20 @@ export default function TaskDetails(props) {
     }
 
     const productivityRatingOptions = [
-        {value: 1, label: 1},
-        {value: 2, label: 2},
-        {value: 3, label: 3},
-        {value: 4, label: 4},
-        {value: 5, label: 5},
+        {value: 1, label: "I finished a lot less than I expected to"},
+        {value: 2, label: "I finished a bit less than I expected to"},
+        {value: 3, label: "I finished exactly what I expected to"},
+        {value: 4, label: "I finished a bit more than I expected to"},
+        {value: 5, label: "I finished a lot more than I expected to"},
     ];
+
+    const productivityRatingToLabel = {
+        1: "I finished a lot less than I expected to",
+        2: "I finished a bit less than I expected to",
+        3: "I finished exactly what I expected to",
+        4: "I finished a bit more than I expected to",
+        5: "I finished a lot more than I expected to",
+    }
 
     const locationOptions = [
         {value: "In-Class", label: "In-Class"},
@@ -247,7 +256,7 @@ export default function TaskDetails(props) {
             Cell: ({ value }) => {
                 return (
                 <>
-                    <Text>{value}</Text>
+                    <Text>{productivityRatingToLabel[value]}</Text>
                 </>
                 );
             },
@@ -315,20 +324,13 @@ export default function TaskDetails(props) {
                     <ModalHeader fontWeight="bold" fontSize="2xl">Working Session Details</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormControl>
-                            <FormLabel fontWeight="bold">Working Session Duration (seconds)</FormLabel>
-                            <Input 
-                                width="50%"
-                                isReadOnly
-                                variant="outline" 
-                                bg="white" 
-                                onChange={(e) => setTime(e.target.value)}
-                                value={time}
-                            />
-                        </FormControl>
+                        <FormLabel fontWeight="bold">Working Session Duration</FormLabel>
+                        <Text>
+                            {getTimeDisplay(getHMSfromDuration(time)[0], getHMSfromDuration(time)[1], getHMSfromDuration(time)[2])}
+                        </Text>
                         <FormControl isRequired>
                             <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>
-                            <FormHelperText mb="1%">Rate how productive you felt your working session was. (DEFINE 1-5 MEANING)</FormHelperText>
+                            <FormHelperText mb="1%">Rate how productive you felt your working session was:</FormHelperText>
                             <Select 
                                 width="50%" 
                                 variant="outline" 
