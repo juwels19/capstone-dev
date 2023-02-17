@@ -32,10 +32,10 @@ export default function Tasklist(props) {
     const searchParams = useSearchParams();
     const message = searchParams.get("message");
 
-    const [taskName, setTaskName] = useState(null);
+    const [taskName, setTaskName] = useState("");
     const [courseSelected, setCourseSelected] = useState(null);
     const [effort, setEffort] = useState(0);
-    const [dueDate, setDueDate] = useState(null);
+    const [dueDate, setDueDate] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
@@ -49,9 +49,9 @@ export default function Tasklist(props) {
       }, [isExploding]);
 
     useEffect(() => {
-        setTaskName(null)
+        setTaskName("")
         setEffort(0)
-        setDueDate(null)
+        setDueDate("")
         setCourseSelected(null)
     }, [isOpen])
 
@@ -115,8 +115,7 @@ export default function Tasklist(props) {
     
     const handleCreateTaskSubmit = async (event) => {
         event.preventDefault();
-
-        if (taskName && effort && isNaN(Date.parse(dueDate)) && courseSelected) {
+        if (taskName && effort && !isNaN(Date.parse(dueDate)) && courseSelected) {
             // Data is valid for task creation
             let body = {
                 taskName: taskName,

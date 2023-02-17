@@ -381,6 +381,7 @@ export default function TaskDetails(props) {
             <Flex alignItems="flex-end">
                 <Heading as="h1" size="xl" pt="1%">
                     Task Details
+                    {task.completed && ` - Completed`}
                 </Heading>
                 <Spacer />
                 <a 
@@ -409,7 +410,13 @@ export default function TaskDetails(props) {
                 <Text as="b" ml="2%">Estimated Time:</Text>
                 <Text ml="0.5%">{effortValueToLabel[task.effortRating]}</Text>
             </Flex>
-            <Flex mt="3%" justify="space-between">
+            {task.completed && 
+                <Flex mt="1%">
+                    <Text as="b">Task Completion Notes:</Text>
+                    <Text ml="0.5%">{task.notes}</Text>
+                </Flex>
+            }
+            <Flex mt="2%" justify="space-between">
                     <Card bg="blue.50" size="lg" w={task.completed ? "100%" : ""}>
                         <CardBody>
                             <Grid templateColumns='repeat(3, 1fr)' gap={8}>

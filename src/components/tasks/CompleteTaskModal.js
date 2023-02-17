@@ -81,7 +81,13 @@ export default function CompleteTaskModal(props) {
     const [relativeProductivity, setRelativeProductivity] = useState(initRelativeProductivity)
     const [blindEstimationChange, setBlindEstimationChange] = useState(initBlindEstimation)
     const [actualEstimationChange, setActualEstimationChange] = useState(initActualEstimation)
-    const [notes, setNotes] = useState("")
+    const [notes, setNotes] = useState(task.notes)
+
+    useEffect(() => {
+        if (completedTaskIsOpen) {
+            setNotes(task.notes)
+        }
+    }, [completedTaskIsOpen])
 
     const submitReflectionHandler = async () => {
         // if (!relativeProductivity || !blindEstimationChange || !actualEstimationChange) {
@@ -204,7 +210,7 @@ export default function CompleteTaskModal(props) {
                         <FormControl>
                             <FormLabel mt="2%" fontWeight="bold" fontSize="xl">Notes:</FormLabel>
                             <FormHelperText mb="1%">Add any notes or reflections now that you&apos;ve completed your task</FormHelperText>
-                            <Textarea onChange={(e) => setNotes(e.target.value)}/>
+                            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}/>
                         </FormControl>
                     </ModalBody>
                     <ModalFooter>
