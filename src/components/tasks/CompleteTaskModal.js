@@ -150,7 +150,7 @@ export default function CompleteTaskModal(props) {
                     <ModalCloseButton />
                     <ModalBody>
                         <Text>You did it! 🎉</Text>
-                        <Text>Before we cross this off your task list, let's take a moment to reflect on your progress 🔥:</Text>
+                        <Text>Before we cross this off your task list, let&apos;s take a moment to reflect on your progress 🔥:</Text>
 
                         <FormLabel mt="2%" fontWeight="bold" fontSize="xl">Predicted Effort and Time:</FormLabel>
                         <Flex>
@@ -203,7 +203,7 @@ export default function CompleteTaskModal(props) {
                         </FormControl> */}
                         <FormControl>
                             <FormLabel mt="2%" fontWeight="bold" fontSize="xl">Notes:</FormLabel>
-                            <FormHelperText mb="1%">Add any notes or reflections now that you've completed your task</FormHelperText>
+                            <FormHelperText mb="1%">Add any notes or reflections now that you&apos;ve completed your task</FormHelperText>
                             <Textarea onChange={(e) => setNotes(e.target.value)}/>
                         </FormControl>
                     </ModalBody>
