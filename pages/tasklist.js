@@ -145,9 +145,20 @@ export default function Tasklist(props) {
     const updateTasks = async (event) => {
         const fetchRes = await fetch(`/api/tasks/fetch/${props.userId}`, {method: "GET"})
 
-        if (fetchRes.ok) {
+        const fetchCoursesRes = await fetch(`/api/courses/fetch/${props.userId}`, {method: "GET"})
+
+        if (fetchRes.ok && fetchCoursesRes.ok) {
             const body = await fetchRes.json()
             setTasks(body.body);
+            const courseBody = await fetchCoursesRes.json()
+            var courseNames = [];
+            for (const course of courseBody.body) {
+                courseNames.push({
+                    value: course.courseName,
+                    label: course.courseName
+                });
+            }
+            setCourseOptions(courseNames);
             toast({
                 position: "top-right",
                 title: `Task ${event} Successful!`,
@@ -306,9 +317,9 @@ export default function Tasklist(props) {
                     <EditTaskModal
                         task={value} 
                         updateTaskHandler={updateTasks}
-                        courseOptions={courseOptions}
-                        handleCreateCourse={handleCreateCourse}
                         isDisabled={value.completed}
+                        _courseOptions={courseOptions}
+                        userId={props.userId}
                     />
                 );
             },

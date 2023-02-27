@@ -13,7 +13,6 @@ async function handler(req, res) {
         const { userId, taskName, courseSelected, effortRating, dueDate, completed, relativeProductivity, blindEstimationChange, actualEstimationChange, notes } = JSON.parse(req.body);        
         const findCourseRes = courseSelected ? await prisma.course.findFirst({where: {courseName: courseSelected, userId: userId}}) : undefined
 
-        console.log(relativeProductivity, blindEstimationChange, actualEstimationChange)
         const taskCreateRes = await prisma.task.update({
             where: {id: parseInt(taskId)},
             data: {

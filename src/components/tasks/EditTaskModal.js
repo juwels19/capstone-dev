@@ -25,9 +25,8 @@ export default function EditTaskModal(props) {
         task, 
         userId, 
         updateTaskHandler,
-        handleCreateCourse,
-        courseOptions,
         isDisabled=false,
+        _courseOptions,
     } = props;
 
     const effortOptions = [
@@ -52,8 +51,11 @@ export default function EditTaskModal(props) {
 
     const [taskName, setTaskName] = useState(task.taskName);
     const [courseSelected, setCourseSelected] = useState({label: task.course.courseName, value: task.course.courseName});
+    const [courseOptions, setCourseOptions] = useState(_courseOptions);
     const [effort, setEffort] = useState({value: task.effortRating, label: effortValueToLabel[task.effortRating]});
     const [dueDate, setDueDate] = useState(task.dueDate);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setTaskName(task.taskName)
@@ -74,6 +76,29 @@ export default function EditTaskModal(props) {
         await fetch (`/api/tasks/${task.id}`, {method: "POST", body: JSON.stringify(body)})
         editTaskOnClose();
         await updateTaskHandler("Edit");
+    }
+
+    const postCreateCourse = async (newCourseName, userId) => {
+        let body = {
+            courseName: newCourseName,
+            userId: userId,
+        }
+        //TODO add error handling here
+        await fetch("/api/courses/new", {method: "POST", body: JSON.stringify(body)})
+    }
+
+    const handleCreateCourse = async (newCourseName, userId) => {
+        setIsLoading(true);
+        //TODO add error handling here
+        const newCourse = {
+            label: newCourseName,
+            value: newCourseName
+        }
+        await postCreateCourse(newCourseName, userId)
+        setCourseOptions((previousOptions) => [...previousOptions, newCourse])
+        setIsLoading(false);
+
+        setCourseSelected(newCourse)
     }
 
     return (
@@ -103,6 +128,8 @@ export default function EditTaskModal(props) {
                                 size="md"
                                 isClearable
                                 options={courseOptions}
+                                isDisabled={isLoading}
+                                isLoading={isLoading}
                                 onCreateOption={(value) => handleCreateCourse(value, userId)}
                                 onChange={(newValue) => setCourseSelected(newValue)}
                                 value={courseSelected}
