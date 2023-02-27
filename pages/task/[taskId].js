@@ -26,10 +26,11 @@ export default function TaskDetails(props) {
     const toast = useToast();
 
     const [time, setTime] = useState(0);
+    const [timePaused, setTimePaused] = useState(0)
     const [isActive, setIsActive] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
 
-    const [startDateTime, setStartDateTime] = useState("");
+    const [startDateTime, setStartDateTime] = useState();
     const [productivityRating, setProductivityRating] = useState(0);
     const [location, setLocation] = useState("");
     const [notes, setNotes] = useState("");
@@ -45,7 +46,9 @@ export default function TaskDetails(props) {
         let interval = null;
         if (isActive && isPaused === false) {
             interval = setInterval(() => {
-                setTime((prevTime) => prevTime + 1)
+                const now = Math.floor(Date.now()/1000)
+                const start = Math.floor(startDateTime/1000)
+                setTime(now-start-timePaused)
             }, 1000);
         } else {
             clearInterval(interval);
@@ -81,15 +84,21 @@ export default function TaskDetails(props) {
     const handleStopwatchStart = () => {
         setIsActive(true);
         setIsPaused(false);
-        setStartDateTime(Date(Date.now()).toString())
+        setStartDateTime(Date.now())
     }
 
     const handleStopwatchPauseResume = () => {
+        if (isPaused) {
+            const now = Math.floor(Date.now()/1000)
+            const start = Math.floor(startDateTime/1000)
+            setTimePaused(now - (start + time))
+        }
         setIsPaused(!isPaused);
     }
 
     const handleStopwatchCompletion = () => {
         setIsPaused(true);
+        setTimePaused(0);
         createSessionOnOpen();
     }
 
@@ -118,7 +127,7 @@ export default function TaskDetails(props) {
         const body = {
             userId: props.userId,
             taskId: props.taskId,
-            startDateTime: startDateTime,
+            startDateTime: Date(startDateTime).toString(),
             duration: time,
             productivityRating: productivityRating,
             notes: notes,
@@ -131,7 +140,6 @@ export default function TaskDetails(props) {
         setTime(0)
         setNotes("")
         setProductivityRating(0)
-        setStartDateTime("")
         createSessionOnClose();
         updateSessions();
         toast({
