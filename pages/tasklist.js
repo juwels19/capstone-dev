@@ -39,7 +39,10 @@ export default function Tasklist(props) {
     const [isLoading, setIsLoading] = useState(false);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
-    const [tasks, setTasks] = useState(props.tasks);
+
+    // TODO (performance): move filtering of completed/active tasks to backend
+    const [completedTasks, setCompletedTasks] = useState(props.tasks.filter((task) => task.completed));
+    const [activeTasks, setActiveTasks] = useState(props.tasks.filter((task) => !task.completed));
 
     const [isExploding, setIsExploding] = useState(false);
 
@@ -148,8 +151,6 @@ export default function Tasklist(props) {
         const fetchCoursesRes = await fetch(`/api/courses/fetch/${props.userId}`, {method: "GET"})
 
         if (fetchRes.ok && fetchCoursesRes.ok) {
-            const body = await fetchRes.json()
-            setTasks(body.body);
             const courseBody = await fetchCoursesRes.json()
             var courseNames = [];
             for (const course of courseBody.body) {
@@ -159,6 +160,12 @@ export default function Tasklist(props) {
                 });
             }
             setCourseOptions(courseNames);
+
+            const body = await fetchRes.json()
+            // setTasks(body.body);
+            setCompletedTasks(body.body.filter((task) => task.completed));
+            setActiveTasks(body.body.filter((task) => !task.completed));
+
             toast({
                 position: "top-right",
                 title: `Task ${event} Successful!`,
@@ -169,14 +176,12 @@ export default function Tasklist(props) {
         }
     }
 
-    const completedTasks = tasks.filter((task) => task.completed);
-    const activeTasks = tasks.filter((task) => !task.completed);
-
     const COLUMNS = [
         {
             Header: '',
             id: 'checkbox',
             accessor: (row) => row,
+            disableSortBy: true,
             Cell: ({ value }) => {
                 return (
                 <>  
@@ -221,7 +226,7 @@ export default function Tasklist(props) {
         {
             Header: 'Due Date',
             accessor: 'dueDate',
-            id: "due_date",
+            sortDescFirst: false,
             Cell: ({ value }) => {
                 const dateOptions = {
                     timeZone: "UTC",
@@ -259,6 +264,7 @@ export default function Tasklist(props) {
             Header: 'Estimated Time',
             accessor: 'effortRating',
             id: "time_estimate",
+            disableSortBy: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -272,6 +278,7 @@ export default function Tasklist(props) {
         {
             Header: 'Actual Time',
             accessor: 'sessions',
+            disableSortBy: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -286,6 +293,7 @@ export default function Tasklist(props) {
             Header: '',
             accessor: 'id',
             id: 'openTask',
+            disableSortBy: true,
             width: 150,
             minWidth: 150,
             maxWidth: 150,
@@ -308,10 +316,10 @@ export default function Tasklist(props) {
             Header: '',
             accessor: (row) => row,
             id: 'editColumn',
+            disableSortBy: true,
             width: 15,
             minWidth: 15,
             maxWidth: 15,
-            sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                     <EditTaskModal
@@ -328,6 +336,7 @@ export default function Tasklist(props) {
             Header: '',
             accessor: (row) => row,
             id: 'deleteColumn',
+            disableSortBy: true,
             width: 15,
             minWidth: 15,
             maxWidth: 15,
@@ -344,6 +353,36 @@ export default function Tasklist(props) {
             },
         },
     ]
+
+    /* 
+        tableOnChangeSortOrder: example of custom table sorting
+    */
+    // const tableOnChangeSortOrder = (tasksToSort, setActiveTasks, sortOrder) => {
+    //     if (sortOrder.length > 0) {
+    //         const { id, desc } = sortOrder[0]
+    //         tasksToSort.sort((first, second) => {
+    //             let [firstValue, secondValue] = [first[id], second[id]]
+    //             // If column is date column
+    //             if (id === "dueDate") { 
+    //                 console.log("sorting by field dueDate");
+    //                 const [firstDate, secondDate] = [Date.parse(firstValue), Date.parse(secondValue)]
+    //                 return desc ? firstDate - secondDate : secondDate - firstDate
+    //             }
+
+    //             if (id === "course") {
+    //                 [firstValue, secondValue] = [firstValue.courseName, secondValue.courseName]
+    //                 console.log("sorting by field course.courseName");
+    //             }
+
+    //             if (desc) {
+    //                 return firstValue > secondValue ? -1 : 1
+    //             } else {
+    //                 return firstValue > secondValue ? 1 : -1
+    //             }
+    //         })  
+    //         setActiveTasks([...tasksToSort])
+    //     }
+    // }
 
     return (
         <Container maxW='container.xl'>
@@ -461,6 +500,7 @@ export default function Tasklist(props) {
                         <Table 
                             columns={COLUMNS} 
                             data={activeTasks}
+                            // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(activeTasks, setActiveTasks, sortOrder) }
                         />
                     </>
                 )
@@ -474,6 +514,7 @@ export default function Tasklist(props) {
                     <Table 
                         columns={COLUMNS} 
                         data={completedTasks}
+                        // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(completedTasks, setCompletedTasks, sortOrder)}
                     />
                 </>
             )}

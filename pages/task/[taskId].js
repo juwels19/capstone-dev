@@ -223,6 +223,7 @@ export default function TaskDetails(props) {
         {
             Header: '',
             accessor: 'startDateTime',
+            disableSortBy: true,
             Cell: ({ value }) => {
                 const options = {month: "short", year: 'numeric', day: "numeric"}
                 return (
@@ -236,6 +237,7 @@ export default function TaskDetails(props) {
             Header: 'Time',
             accessor: (row) => row,
             id: "time",
+            disableSortBy: true,
             Cell: ({ value }) => {
                 const startDate = new Date(value.startDateTime)
                 const endDate = new Date(startDate.getTime() + value.duration * 1000)
@@ -279,6 +281,7 @@ export default function TaskDetails(props) {
         {
             Header: 'Notes',
             accessor: 'notes',
+            disableSortBy: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -290,11 +293,11 @@ export default function TaskDetails(props) {
         {
             Header: '',
             id: 'editSession',
+            disableSortBy: true,
             accessor: (row) => row,
             width: 20,
             minWidth: 20,
             maxWidth: 20,
-            sortDescFirst: true,
             Cell: ({ value }) => {
                 return (
                 <>
@@ -307,6 +310,7 @@ export default function TaskDetails(props) {
             Header: '',
             accessor: 'id',
             id: 'deleteSession',
+            disableSortBy: true,
             width: 20,
             minWidth: 20,
             maxWidth: 20,

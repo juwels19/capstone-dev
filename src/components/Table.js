@@ -40,7 +40,10 @@ export default function Table(props){
     {
       columns,
       data,
-      manualSortBy: true,
+      // manualSortBy=true will allow for custom sorting implementation.
+      //    currently sorting is completed by react-table
+      // manualSortBy: true,
+      disableMultiSort: true,
     },
     useSortBy
   );
@@ -73,25 +76,15 @@ export default function Table(props){
                     paddingX="0"
                     fontSize="14px"
                     textColor="black"
-                    {...column.getHeaderProps(column.getSortByToggleProps())}
+                    {...column.getHeaderProps(column.getSortByToggleProps({title: column.canSort ? "Click to sort" : undefined}))}
                     width={column.width}
                     minWidth={column.minWidth}
                     maxWidth={column.maxWidth}
                     key={column.id}
                     _first={{textAlign: "left"}}
                   >
-                    {column.render('Header')}
-
                     {/* SORTING LOGIC BELOW */}
-                    {/* {column.isSorted ? (
-                          column.isSortedDesc ? (
-                            <ArrowDownIcon aria-label="sorted descending" />
-                          ) : (
-                            <ArrowUpIcon aria-label="sorted ascending" />
-                          )
-                        ) : null
-                    } */}
-                    {/* <Flex justify={"center"} >
+                    <Flex justify={"center"} >
                       <Box height="24px" display="inline">
                         {column.render('Header')}
                       </Box>
@@ -104,7 +97,7 @@ export default function Table(props){
                           )
                         ) : null}
                       </Box>
-                    </Flex> */}
+                    </Flex>
                   </Th>
                 ))}
               </Tr>

@@ -9,18 +9,18 @@ export const calculateDateDifference = (dueDate) => {
         // Due date is more than a day in the future
         const daysAway = Math.ceil(diff / msInDay);
         if (daysAway > 1) {
-            return `(due in ${daysAway} days)`;
+            return `(in ${daysAway} days)`;
         } else {
-            return `(due tomorrow)`;
+            return `(tomorrow)`;
         }
     } else {
         const daysAgo = Math.abs(Math.ceil(diff / msInDay));
         if (daysAgo > 1) {
-            return `(was due ${daysAgo} days ago)`
+            return `(${daysAgo} days ago)`
         } else if (daysAgo == 1) {
-            return `(was due yesterday)`
+            return `(yesterday)`
         }else {
-            return `(due today)`
+            return `(today)`
         }
     }
 
