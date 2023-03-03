@@ -1,5 +1,5 @@
-import { SmallAddIcon, ChevronRightIcon, InfoIcon, ExternalLinkIcon } from "@chakra-ui/icons";
-import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container, Divider } from "@chakra-ui/react";
+import { SmallAddIcon, ChevronRightIcon, ChevronDownIcon, InfoIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container, Divider, IconButton } from "@chakra-ui/react";
 import {
     Modal,
     ModalOverlay,
@@ -37,6 +37,7 @@ export default function Tasklist(props) {
     const [effort, setEffort] = useState(0);
     const [dueDate, setDueDate] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isCollapsed, setIsColapsed] = useState(true);
 
     const [courseOptions, setCourseOptions] = useState(props.courses);
 
@@ -174,6 +175,10 @@ export default function Tasklist(props) {
                 isClosable: true
             });
         }
+    }
+
+    const toggleCompletedTasksCollapse = () => {
+        setIsColapsed(!isCollapsed);
     }
 
     const COLUMNS = [
@@ -508,14 +513,25 @@ export default function Tasklist(props) {
             {completedTasks.length > 0 && (
                 <>
                     <Divider mt="2%" />
-                    <Heading as="h2" size="lg" mt="2%">
-                        Completed Tasks
-                    </Heading>
-                    <Table 
-                        columns={COLUMNS} 
-                        data={completedTasks}
-                        // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(completedTasks, setCompletedTasks, sortOrder)}
-                    />
+                    <Flex align="bottom" my="2%">
+                        <Heading as="h2" size="lg">
+                            Completed Tasks
+                        </Heading>
+                        <IconButton 
+                            aria-label="toggle-collapse-tasks"
+                            icon={isCollapsed ? <ChevronRightIcon boxSize={8}/> : <ChevronDownIcon boxSize={8}/>}
+                            onClick={toggleCompletedTasksCollapse}
+                            variant="ghost"
+                            mx="1%"
+                        />
+                    </Flex>
+                    {!isCollapsed && (
+                        <Table 
+                            columns={COLUMNS} 
+                            data={completedTasks}
+                            // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(completedTasks, setCompletedTasks, sortOrder)}
+                        />
+                    )}
                 </>
             )}
         </Container>
