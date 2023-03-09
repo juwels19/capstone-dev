@@ -229,6 +229,9 @@ export default function TaskDetails(props) {
 
     const calculateAvgProductivity = () => {
         const totalSessions = sessions.length;
+        if (totalSessions === 0) {
+            return 0.0;
+        }
         var totalProd = 0;
         for (const session of sessions) {
             totalProd += session.productivityRating
