@@ -12,13 +12,16 @@ import {
     FormLabel,
     FormHelperText,
     ButtonGroup,
-    Textarea
+    Textarea,
+    Flex,
+    VStack,
+    Input
 } from '@chakra-ui/react';
 import {
     EditIcon
 } from '@chakra-ui/icons'
 import { Select } from "chakra-react-select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function EditSessionModal(props) {
     const {
@@ -28,9 +31,19 @@ export default function EditSessionModal(props) {
     } = props;
 
     const { isOpen: editSessionIsOpen, onClose: editSessionOnClose, onOpen: editSessionOnOpen } = useDisclosure();
+    const [startDateTime, setStartDateTime] = useState(session.startDateTime);
+    const [endDateTime, setEndDateTime] = useState((new Date(new Date(startDateTime) - ((new Date()).getTimezoneOffset() * 60000) + (session.duration * 1000))).toISOString().slice(0, -5));
     const [productivityRating, setProductivityRating] = useState(session.productivityRating);
     const [location, setLocation] = useState(session.location);
     const [notes, setNotes] = useState(session.notes);
+
+    useEffect(() => {
+        setStartDateTime(session.startDateTime)
+        setEndDateTime((new Date(new Date(startDateTime) - ((new Date()).getTimezoneOffset() * 60000) + (session.duration * 1000))).toISOString().slice(0, -5))
+        setProductivityRating(session.productivityRating)
+        setLocation(session.location)
+        setNotes(session.notes)
+    }, [editSessionIsOpen])
 
     const productivityRatingOptions = [
         {value: 1, label: "I finished less than I expected to"},
@@ -53,11 +66,15 @@ export default function EditSessionModal(props) {
 
     const handleEditSessionSubmit = async (event) => {
         event.preventDefault();
+        const duration = (Date.parse(endDateTime) - Date.parse(startDateTime)) / 1000 // Date.parse is in milliseconds
+        console.log(startDateTime, endDateTime, duration)
         const body = {
             userId: userId,
             productivityRating: productivityRating,
             notes: notes,
-            location: location
+            location: location,
+            startDateTime: startDateTime,
+            duration: duration
         }
         await fetch (`/api/sessions/${session.id}`, {method: "POST", body: JSON.stringify(body)})
         editSessionOnClose();
@@ -72,8 +89,30 @@ export default function EditSessionModal(props) {
                     <ModalHeader fontWeight="bold" fontSize="2xl">Edit Working Session Details</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormControl isRequired>
-                            <FormLabel mt="2%" fontWeight="bold">Productivity Rating</FormLabel>
+                    <Flex justify="space-between">
+                            <VStack>
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="bold">Session Start Date and Time</FormLabel>
+                                    <Input
+                                        type="datetime-local"
+                                        onChange={(e) => setStartDateTime(e.target.value)}
+                                        defaultValue={(new Date(new Date(startDateTime) - ((new Date()).getTimezoneOffset() * 60000))).toISOString().slice(0, -5)}
+                                    />
+                                </FormControl>
+                            </VStack>
+                            <VStack>
+                                <FormControl isRequired>
+                                    <FormLabel fontWeight="bold">Session End Date and Time</FormLabel>
+                                    <Input 
+                                        type="datetime-local"
+                                        onChange={(e) => setEndDateTime(e.target.value)}
+                                        value={endDateTime}
+                                    />
+                                </FormControl>
+                            </VStack>
+                        </Flex>
+                        <FormControl mt="2%" isRequired>
+                            <FormLabel fontWeight="bold">Productivity Rating</FormLabel>
                             <FormHelperText mb="1%">Rate how productive you felt your working session was:</FormHelperText>
                             <Select 
                                 width="50%" 

@@ -219,6 +219,51 @@ export default function TaskDetails(props) {
         {value: "Other", label: "Other"},
     ];
 
+    const dateOptions = {
+        timeZone: "UTC",
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+    }
+
+    const calculateAvgProductivity = () => {
+        const totalSessions = sessions.length;
+        var totalProd = 0;
+        for (const session of sessions) {
+            totalProd += session.productivityRating
+        }
+        return (totalProd / totalSessions).toFixed(1);
+    }
+
+    const calculateEstimationDifference = () => {
+        const effortValueToBounds = {
+            1: "0-0.5",
+            2: "0.5-1",
+            3: "1-3",
+            5: "3-6",
+            8: "6-12",
+            13: "12-"
+        }
+
+        const lowerBound = parseInt(effortValueToBounds[task.effortRating].split("-")[0]) * 3600;
+        const upperBound = parseInt(effortValueToBounds[task.effortRating].split("-")[1]) * 3600;
+
+        var totalDuration = 0;
+        for (const session of sessions) {
+            totalDuration += session.duration;
+        }
+
+        if (totalDuration < lowerBound) {
+            return [`- ${getTimeDisplay(...getHMSfromDuration(lowerBound - totalDuration))}`, "red"]
+        } else if (!isNaN(upperBound) && totalDuration > upperBound) {
+            return [`+ ${getTimeDisplay(...getHMSfromDuration(totalDuration - upperBound))}`, "red"]
+        }
+
+        return ["Nailed it! 🎉", ""]
+
+    }
+
     const COLUMNS = [
         {
             Header: '',
@@ -411,7 +456,7 @@ export default function TaskDetails(props) {
                 <Text as="b">Course:</Text>
                 <Tag ml="0.5%" backgroundColor={task.course.colourCode} textColor="white">{task.course.courseName}</Tag>
                 <Text as="b" ml="2%">Due Date:</Text>
-                <Text ml="0.5%">{new Date(task.dueDate).toDateString()}</Text>
+                <Text ml="0.5%">{new Date(task.dueDate).toLocaleDateString("en-US", dateOptions)}</Text>
                 <Text ml="1%" color="gray.500">{calculateDateDifference(task.dueDate)}</Text>
                 <Text as="b" ml="2%">Effort:</Text>
                 <Text ml="0.5%">{task.effortRating}</Text>
@@ -425,58 +470,76 @@ export default function TaskDetails(props) {
                 </Flex>
             }
             <Flex mt="2%" justify="space-between">
-                    <Card bg="blue.50" size="lg" w={task.completed ? "100%" : ""}>
-                        <CardBody>
-                            <Grid templateColumns='repeat(3, 1fr)' gap={8}>
-                                <GridItem w="100%">
-                                    <VStack justifyContent="space-between">
-                                        <Text align="center" as="b" fontSize="xl">Total Time Spent</Text>
-                                        <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(totalSessionTime))}</Text>
-                                    </VStack>
-                                </GridItem>
+                <Card bg="blue.50" size="lg" w={task.completed ? "100%" : ""}>
+                    <CardBody>
+                        <Grid templateColumns={task.completed ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)'} gap={4}>
+                            <GridItem w="100%">
+                                <VStack justifyContent="space-between">
+                                    <Text align="center" as="b" fontSize="lg">Total Time <br/>Spent</Text>
+                                    <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(totalSessionTime))}</Text>
+                                </VStack>
+                            </GridItem>
+                            <GridItem w="100%">
+                                <VStack>
+                                    <Text align="center" as="b" fontSize="lg">Number of <br/>Sessions</Text>
+                                    <Text as="b" fontSize="3xl">{totalSessions}</Text>
+                                </VStack>
+                            </GridItem>
+                            <GridItem w="100%">
+                                <VStack>
+                                    <Text align="center" as="b" fontSize="lg">Average Session <br/>Time</Text>
+                                    <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(averageSessionTime))}</Text>
+                                </VStack>
+                            </GridItem>
+                            <GridItem w="100%">
+                                <VStack>
+                                    <Text align="center" as="b" fontSize="lg">Average Productivity <br/>Rating</Text>
+                                    <Text as="b" fontSize="3xl">{calculateAvgProductivity()}</Text>
+                                </VStack>
+                            </GridItem>
+                            {task.completed &&
                                 <GridItem w="100%">
                                     <VStack>
-                                        <Text align="center" as="b" fontSize="xl">Number of Sessions</Text>
-                                        <Text as="b" fontSize="3xl">{totalSessions}</Text>
+                                        <Text align="center" as="b" fontSize="lg">Estimation <br/> Difference</Text>
+                                        <Text 
+                                            as="b" 
+                                            fontSize="3xl"
+                                            color={calculateEstimationDifference()[1]}
+                                        >{calculateEstimationDifference()[0]}</Text>
                                     </VStack>
                                 </GridItem>
-                                <GridItem w="100%">
-                                    <VStack>
-                                        <Text align="center" as="b" fontSize="xl">Average Session Time</Text>
-                                        <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(averageSessionTime))}</Text>
-                                    </VStack>
-                                </GridItem>
-                            </Grid>
-                        </CardBody>
-                    </Card>
-                    { !task.completed &&
-                        <Card bg="blue.50" size="lg" w="400px">
-                            <CardBody justify="space-between">
-                                <Flex direction="column" align="center" justify="space-between">
-                                    <Text as="b" fontSize="3xl" mb="7px">
-                                        {("0" + Math.floor(time / 3600)).slice(-2)}:
-                                        {("0" + Math.floor((time / 60) % 60)).slice(-2)}:
-                                        {("0" + (time % 60)).slice(-2)}
-                                    </Text>
-                                    <HStack>
-                                        {!isActive && 
-                                            <Button size="sm" bg="white" aria-label="start-stopwatch" leftIcon={<Icon as={FaPlay}/>}
-                                                onClick={handleStopwatchStart}
-                                            >
-                                                <Text fontSize='14px'>Start Session</Text>
-                                            </Button>
-                                        }
-                                        {(isActive && !isPaused) && 
-                                            <Button 
-                                                size="sm" 
-                                                bg="white" 
-                                                aria-label="stop-stopwatch" 
-                                                leftIcon={<Icon as={FaPause}/>}
-                                                onClick={handleStopwatchPauseResume}
-                                            >
-                                                <Text fontSize='14px'>Pause Session</Text>
-                                            </Button>
-                                        }
+                            }
+                        </Grid>
+                    </CardBody>
+                </Card>
+                { !task.completed &&
+                    <Card bg="blue.50" size="lg" w="400px">
+                        <CardBody justify="space-between">
+                            <Flex direction="column" align="center" justify="space-between">
+                                <Text as="b" fontSize="3xl" mb="7px">
+                                    {("0" + Math.floor(time / 3600)).slice(-2)}:
+                                    {("0" + Math.floor((time / 60) % 60)).slice(-2)}:
+                                    {("0" + (time % 60)).slice(-2)}
+                                </Text>
+                                <HStack>
+                                    {!isActive && 
+                                        <Button size="sm" bg="white" aria-label="start-stopwatch" leftIcon={<Icon as={FaPlay}/>}
+                                            onClick={handleStopwatchStart}
+                                        >
+                                            <Text fontSize='14px'>Start Session</Text>
+                                        </Button>
+                                    }
+                                    {(isActive && !isPaused) && 
+                                        <Button 
+                                            size="sm" 
+                                            bg="white" 
+                                            aria-label="stop-stopwatch" 
+                                            leftIcon={<Icon as={FaPause}/>}
+                                            onClick={handleStopwatchPauseResume}
+                                        >
+                                            <Text fontSize='14px'>Pause Session</Text>
+                                        </Button>
+                                    }
                                         {(isActive && isPaused) && 
                                             <Button 
                                                 size="sm" 
@@ -499,14 +562,18 @@ export default function TaskDetails(props) {
                                                 <Text fontSize='14px'>Complete Session</Text>
                                             </Button>
                                         }
-                                    </HStack>
-                                </Flex>
-                            </CardBody>
-                        </Card>
-                    }
+                                </HStack>
+                            </Flex>
+                        </CardBody>
+                    </Card>
+                }
             </Flex>
             <Heading as="h2" size="lg" mt="2%">Working Session Log</Heading>
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
+            {/* <Flex mt="2%" justify="space-between" alignItems="center">
+                <ExternalSessionModal userId={props.userId} />
+                <Spacer />
+            </Flex> */}
             {
                 sessions.length === 0 
                 ? <NoSessions />
