@@ -613,21 +613,21 @@ export async function getServerSideProps(context) {
             },
         };
     }
-    
-    if (session.id !== taskId) {
-        return {
-            redirect: {
-                destination: "/tasklist",
-                permanent: false
-            },
-        };
-    }
 
     const task = await prisma.task.findUnique({where: {id: taskId}, include: {course: true}})
     if (task === null) {
         return {
             redirect: {
                 destination: "/tasklist?message=task_dne",
+                permanent: false
+            },
+        };
+    }
+
+    if (session.id !== task.userId) {
+        return {
+            redirect: {
+                destination: "/tasklist",
                 permanent: false
             },
         };
