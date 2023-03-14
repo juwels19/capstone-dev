@@ -24,7 +24,8 @@ async function handler(req, res) {
                 },
                 taskName: taskName,
                 dueDate: dueDate,
-                effortRating: effort
+                effortRating: effort,
+                createdAt: new Date().toString(),
             }
         })
         //Send success response

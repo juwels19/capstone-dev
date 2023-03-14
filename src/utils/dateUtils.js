@@ -1,3 +1,4 @@
+import moment from "moment";
 
 export const calculateDateDifference = (dueDate) => {
     const msInDay = 86400000;
@@ -33,4 +34,26 @@ export const getHMSfromDuration = (durationSeconds) => {
     const minutes = totalMinutes % 60;
 
     return [hours, minutes, seconds]
+}
+
+export const getTimeDisplay = (hours, minutes, seconds) => {
+    return (
+        hours ? `${hours.toFixed(0)}h ${minutes.toFixed(0)}m` : 
+        minutes ? `${minutes.toFixed(0)}m` :
+        seconds ? `${seconds.toFixed(0)}s` : "-"
+    )
+}
+
+export const setDateToMonday = ( date ) => {
+    const dateMoment = moment(date)
+    return dateMoment.startOf('isoWeek')
+    // var day = date.getDay() || 7;  
+    // if( day !== 1 ) 
+    //     date.setHours(-24 * (day - 1)); 
+    // return date;
+}
+
+
+export const isDueDateClose = (date) => {
+    return moment(moment().format()).isBetween(moment(date).subtract(2, "days"), date)
 }

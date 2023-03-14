@@ -69,6 +69,10 @@ model Task {
   blindEstimationChange Int?
   actualEstimationChange Int?
   notes String?
+  createdAt String?
+  correctPredictionAnswer String?
+  incorrectPredictionAnswer String?
+  predictionImprovementAnswer String?
   sessions Session[]
 }
 

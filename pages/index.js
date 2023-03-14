@@ -9,7 +9,7 @@ export default function Home() {
     const router = useRouter();
 
     return (
-            <Center h="80vh">
+            <Center h="100vh">
               <Card size="lg" variant="ghost" align="center" justify="center">
                   <CardBody>
                       <Image src={timeifyLogo} alt="timeify logo"/>

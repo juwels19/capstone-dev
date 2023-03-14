@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 
 import prisma from "@prisma/index";
-import {calculateDateDifference, getHMSfromDuration} from "src/utils/dateUtils"
+import {calculateDateDifference, getHMSfromDuration, getTimeDisplay, isDueDateClose} from "src/utils/dateUtils"
 
 import EditSessionModal from "@components/sessions/EditSessionModal";
 import DeleteSessionModal from "@components/sessions/DeleteSessionModal";   
@@ -192,14 +192,6 @@ export default function TaskDetails(props) {
         }
     }
 
-    const getTimeDisplay = (hours, minutes, seconds) => {
-        return (
-            hours ? `${hours.toFixed(0)}h ${minutes.toFixed(0)}m` : 
-            minutes ? `${minutes.toFixed(0)}m ${seconds.toFixed(0)}s` :
-            seconds ? `${seconds.toFixed(0)}s` : "-"
-        )
-    }
-
     const productivityRatingOptions = [
         {value: 1, label: "I finished less than I expected to"},
         {value: 2, label: "I finished exactly what I expected to"},
@@ -266,6 +258,8 @@ export default function TaskDetails(props) {
         return ["Nailed it! 🎉", ""]
 
     }
+
+    const [estimationDifferenceText, estimationDifferenceColor] = calculateEstimationDifference()
 
     const COLUMNS = [
         {
@@ -436,79 +430,56 @@ export default function TaskDetails(props) {
             </Button>
             <Flex alignItems="flex-end">
                 <Heading as="h1" size="xl" pt="1%">
-                    Task Details
-                    {task.completed && ` - Completed`}
+                    {task.taskName}
+                    {task.completed && `    ✅`}
                 </Heading>
-                <Spacer />
-                <a 
-                    href="https://docs.google.com/document/d/14Q9OELTXoTvf7YjV_IWmaKr41ze2SHFNFBhw1KKV-i8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
-                    <Button
-                        size="md"
-                        colorScheme="blue"
-                        rightIcon={<ExternalLinkIcon />}
-                    >
-                        Help
-                    </Button>
-                </a>
-            </Flex>
-            <Flex mt="2%">
-                <Text as="b">Task Name:</Text>
-                <Text ml="0.5%">{task.taskName}</Text>
             </Flex>
             <Flex mt="1%">
                 <Text as="b">Course:</Text>
                 <Tag ml="0.5%" backgroundColor={task.course.colourCode} textColor="white">{task.course.courseName}</Tag>
                 <Text as="b" ml="2%">Due Date:</Text>
-                <Text ml="0.5%">{new Date(task.dueDate).toLocaleDateString("en-US", dateOptions)}</Text>
+                <Text ml="0.5%" textColor={isDueDateClose(task.dueDate) ? "#b20d30" : ""}>{new Date(task.dueDate).toLocaleDateString("en-US", dateOptions)}</Text>
                 <Text ml="1%" color="gray.500">{calculateDateDifference(task.dueDate)}</Text>
                 <Text as="b" ml="2%">Effort:</Text>
                 <Text ml="0.5%">{task.effortRating}</Text>
-                <Text as="b" ml="2%">Estimated Time:</Text>
-                <Text ml="0.5%">{effortValueToLabel[task.effortRating]}</Text>
             </Flex>
-            {task.completed && 
-                <Flex mt="1%">
-                    <Text as="b">Task Completion Notes:</Text>
-                    <Text ml="0.5%">{task.notes}</Text>
-                </Flex>
-            }
             <Flex mt="2%" justify="space-between">
                 <Card bg="blue.50" size="lg" w={task.completed ? "100%" : ""}>
                     <CardBody>
-                        <Grid templateColumns={task.completed ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)'} gap={4}>
+                        <Grid templateColumns={task.completed ? 'repeat(5, 1fr)' : 'repeat(4, 1fr)'} gap={6}>
                             <GridItem w="100%">
                                 <VStack justifyContent="space-between">
-                                    <Text align="center" as="b" fontSize="lg">Total Time <br/>Spent</Text>
-                                    <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(totalSessionTime))}</Text>
+                                    <Text align="center" as="b" fontSize="xl">Total Time <br/>Spent</Text>
+                                    <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(time < 60 ? totalSessionTime : totalSessionTime + time))}</Text>
                                 </VStack>
                             </GridItem>
                             <GridItem w="100%">
                                 <VStack>
-                                    <Text align="center" as="b" fontSize="lg">Number of <br/>Sessions</Text>
-                                    <Text as="b" fontSize="3xl">{totalSessions}</Text>
+                                    <Text align="center" as="b" fontSize="xl">Estimated<br/>Time</Text>
+                                    <Text as="b" fontSize="3xl">{effortValueToLabel[task.effortRating]}</Text>
                                 </VStack>
                             </GridItem>
                             <GridItem w="100%">
                                 <VStack>
-                                    <Text align="center" as="b" fontSize="lg">Average Session <br/>Time</Text>
+                                    <Text align="center" as="b" fontSize="xl">Number of <br/>Sessions</Text>
+                                    <Text as="b" fontSize="3xl">{totalSessions !== 0 ? totalSessions : "-"}</Text>
+                                </VStack>
+                            </GridItem>
+                            <GridItem w="100%">
+                                <VStack>
+                                    <Text align="center" as="b" fontSize="xl">Average Session <br/>Time</Text>
                                     <Text as="b" fontSize="3xl">{getTimeDisplay(...getHMSfromDuration(averageSessionTime))}</Text>
-                                </VStack>
-                            </GridItem>
-                            <GridItem w="100%">
-                                <VStack>
-                                    <Text align="center" as="b" fontSize="lg">Average Productivity <br/>Rating</Text>
-                                    <Text as="b" fontSize="3xl">{calculateAvgProductivity()}</Text>
                                 </VStack>
                             </GridItem>
                             {task.completed &&
                                 <GridItem w="100%">
                                     <VStack>
-                                        <Text align="center" as="b" fontSize="lg">Estimation <br/> Difference</Text>
+                                        <Text align="center" as="b" fontSize="xl">Estimation <br/> Difference</Text>
                                         <Text 
                                             as="b" 
                                             fontSize="3xl"
-                                            color={calculateEstimationDifference()[1]}
-                                        >{calculateEstimationDifference()[0]}</Text>
+                                            color={estimationDifferenceColor}
+                                        >{estimationDifferenceText}</Text>
                                     </VStack>
                                 </GridItem>
                             }
@@ -571,6 +542,31 @@ export default function TaskDetails(props) {
                     </Card>
                 }
             </Flex>
+            <Heading as="h2" size="lg" mt="2%">Post Task Reflection</Heading>
+            {(task.completed && estimationDifferenceColor === "") &&
+                <Flex>
+                    <Text mt="1%" fontSize="lg" as="b">Why do you think your prediction was correct for this task?</Text>    
+                    <Text mt="1%" fontSize="lg" ml="1%">{task.correctPredictionAnswer}</Text>
+                </Flex>
+            }
+            {(task.completed && estimationDifferenceColor !== "") &&
+                <>
+                    <Flex>
+                        <Text mt="1%" fontSize="lg" as="b">Why do you think your prediction was incorrect for this task?</Text>    
+                        <Text mt="1%" fontSize="lg" ml="1%">{task.incorrectPredictionAnswer}</Text>
+                    </Flex>
+                    <Flex>
+                        <Text mt="1%" fontSize="lg" as="b">What would you do differently next time for a similar task?</Text>    
+                        <Text mt="1%" fontSize="lg" ml="1%">{task.predictionImprovementAnswer}</Text>
+                    </Flex>
+                </>
+            }
+            {(task.completed && task.notes !== "") && 
+                <Flex>
+                    <Text mt="1%" fontSize="lg" as="b">General Notes: </Text>    
+                    <Text mt="1%" fontSize="lg" ml="1%">{task.notes}</Text>
+                </Flex>
+            }
             <Heading as="h2" size="lg" mt="2%">Working Session Log</Heading>
             <Text mt="1%">Record the time spent on the task by turning on the stopwatch in the top right corner to start a working session.</Text>
             {/* <Flex mt="2%" justify="space-between" alignItems="center">
@@ -598,12 +594,30 @@ export default function TaskDetails(props) {
 
 export async function getServerSideProps(context) {
     const session = await getSession(context);
-    const taskId = parseInt(context.query.taskId)
+    if (!session) {
+        return {
+            redirect: {
+                destination: "/login",
+                permanent: false
+            },
+            props: {},
+          };
+    }
 
-    if (isNaN(parseInt(taskId))) {
+    const taskId = parseInt(context.query.taskId)
+    if (isNaN(taskId)) {
         return {
             redirect: {
                 destination: "/tasklist?message=invalid_data",
+                permanent: false
+            },
+        };
+    }
+    
+    if (session.id !== taskId) {
+        return {
+            redirect: {
+                destination: "/tasklist",
                 permanent: false
             },
         };
@@ -634,23 +648,6 @@ export async function getServerSideProps(context) {
         ]
     })
 
-    if (!session) {
-        if (session.id !== task.userId) {
-            return {
-                redirect: {
-                    destination: "/tasklist?message=not_permitted",
-                    permanent: false
-                },
-            };
-        }
-        return {
-            redirect: {
-                destination: "/login",
-                permanent: false
-            },
-            props: {},
-          };
-    }
     return {
         props: {
             taskId: taskId,

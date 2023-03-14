@@ -67,13 +67,12 @@ export default function EditSessionModal(props) {
     const handleEditSessionSubmit = async (event) => {
         event.preventDefault();
         const duration = (Date.parse(endDateTime) - Date.parse(startDateTime)) / 1000 // Date.parse is in milliseconds
-        console.log(startDateTime, endDateTime, duration)
         const body = {
             userId: userId,
             productivityRating: productivityRating,
             notes: notes,
             location: location,
-            startDateTime: startDateTime,
+            startDateTime: new Date(startDateTime).toString(),
             duration: duration
         }
         await fetch (`/api/sessions/${session.id}`, {method: "POST", body: JSON.stringify(body)})

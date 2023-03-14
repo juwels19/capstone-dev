@@ -26,7 +26,7 @@ import { useTable, useSortBy } from 'react-table'; // React Table
 // };
 
 export default function Table(props){
-  const { columns, data, loading, onChangeSortOrder, onRowClick } = props;
+  const { columns, data, loading, onChangeSortOrder, onRowClick, defaultSortColumnId, defaultSortColumnDesc } = props;
 
   // Table rendering functions
   const {
@@ -44,6 +44,14 @@ export default function Table(props){
       //    currently sorting is completed by react-table
       // manualSortBy: true,
       disableMultiSort: true,
+      initialState: {
+        sortBy: [
+          {
+            id: defaultSortColumnId,
+            desc: defaultSortColumnDesc
+          }
+        ]
+      }
     },
     useSortBy
   );

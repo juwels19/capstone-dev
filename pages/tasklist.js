@@ -1,4 +1,5 @@
 import { SmallAddIcon, ChevronRightIcon, ChevronDownIcon, InfoIcon, ExternalLinkIcon } from "@chakra-ui/icons";
+import { GoGraph } from "react-icons/go";
 import { Box, Button, ButtonGroup, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Spacer, Tag, Tooltip, Text, useDisclosure, useToast, HStack, Container, Divider, IconButton } from "@chakra-ui/react";
 import {
     Modal,
@@ -20,9 +21,10 @@ import NoTasks from "@components/tasks/NoTasks";
 import CompleteTaskModal from "@components/tasks/CompleteTaskModal";
 import EditTaskModal from "@components/tasks/EditTaskModal";
 import DeleteTaskModal from "@components/tasks/DeleteTaskModal";
-import { calculateDateDifference, getHMSfromDuration } from "src/utils/dateUtils"
+import { calculateDateDifference, getHMSfromDuration, getTimeDisplay, isDueDateClose } from "src/utils/dateUtils"
 
 import ConfettiExplosion from 'react-confetti-explosion';
+import moment from "moment";
 
 export default function Tasklist(props) {
 
@@ -75,14 +77,6 @@ export default function Tasklist(props) {
         5: "3 - 6 hours",
         8: "6 - 12 hours",
         13: "12+ hours"
-    }
-
-    const getTimeDisplay = (hours, minutes, seconds) => {
-        return (
-            hours ? `${hours.toFixed(0)}h ${minutes.toFixed(0)}m` : 
-            minutes ? `${minutes.toFixed(0)}m ${seconds.toFixed(0)}s` :
-            seconds ? `${seconds.toFixed(0)}s` : "-"
-        )
     }
 
     const calculateSessionTime = (sessions) => {
@@ -230,6 +224,7 @@ export default function Tasklist(props) {
         },
         {
             Header: 'Due Date',
+            id: "dueDate",
             accessor: 'dueDate',
             sortDescFirst: false,
             Cell: ({ value }) => {
@@ -242,7 +237,7 @@ export default function Tasklist(props) {
                 }
                 return (
                 <>
-                    <Text as="b">
+                    <Text as="b" textColor={isDueDateClose(value) ? "#b20d30" : ""}>
                         {new Date(`${value}`).toLocaleDateString("en-US", dateOptions)}
                     </Text>
                     <Text>
@@ -391,7 +386,7 @@ export default function Tasklist(props) {
 
     return (
         <Container maxW='container.xl'>
-            <Flex pt="5%" pb="5%">
+            <Flex pt="5%" pb="3%">
                 <Heading as="h1" size="2xl">
                     {props.userfirstName.charAt(0).toUpperCase() + props.userfirstName.substring(1).toLowerCase()}&apos;s Task List
                 </Heading>
@@ -403,7 +398,15 @@ export default function Tasklist(props) {
                             onClick={onOpen}>
                         Create Task
                     </Button>
-                    <a 
+                    <Link href="/analytics">
+                        <Button rightIcon={<GoGraph boxSize="1.5em"/>}
+                                size="md" 
+                                colorScheme="orange"
+                                >
+                            Analytics
+                        </Button>
+                    </Link>
+                    {/* <a 
                         href="https://docs.google.com/document/d/14Q9OELTXoTvf7YjV_IWmaKr41ze2SHFNFBhw1KKV-i8/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
                             <Button
                                 size="md"
@@ -412,7 +415,7 @@ export default function Tasklist(props) {
                             >
                                 Help
                             </Button>
-                    </a>
+                    </a> */}
                     <Button size="md"
                             colorScheme="red"
                             onClick={() => signOut({callbackUrl: "/"})}>
@@ -505,6 +508,8 @@ export default function Tasklist(props) {
                         <Table 
                             columns={COLUMNS} 
                             data={activeTasks}
+                            defaultSortColumnId="dueDate"
+                            defaultSortColumnDesc={false}
                             // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(activeTasks, setActiveTasks, sortOrder) }
                         />
                     </>
@@ -529,6 +534,8 @@ export default function Tasklist(props) {
                         <Table 
                             columns={COLUMNS} 
                             data={completedTasks}
+                            defaultSortColumnId="dueDate"
+                            defaultSortColumnDesc={false}
                             // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(completedTasks, setCompletedTasks, sortOrder)}
                         />
                     )}
@@ -541,6 +548,16 @@ export default function Tasklist(props) {
 
 export async function getServerSideProps(context) {
     const session = await getSession(context);
+
+    if (!session) {
+        return {
+            redirect: {
+                destination: "/login",
+                permanent: false
+            },
+            props: {},
+          };
+    }
 
     // Get the courses associated with this user
     const courses = await prisma.course.findMany({where: {userId: session.id}})
@@ -572,15 +589,6 @@ export async function getServerSideProps(context) {
         }
     })
 
-    if (!session) {
-        return {
-            redirect: {
-                destination: "/login",
-                permanent: false
-            },
-            props: {},
-          };
-    }
     return {
         props: {
             courses: courseNames,
