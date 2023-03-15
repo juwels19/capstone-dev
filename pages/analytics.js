@@ -12,6 +12,7 @@ import TrendAccordion from "@components/analytics/TrendAccordion";
 import moment from "moment";
 
 import dynamic from "next/dynamic";
+import prisma from "@prisma/index";
 const TimeifyBarChart = dynamic(import("@components/analytics/TimeifyBarChart"), {ssr: false})
 const TimeifyLineChart = dynamic(import("@components/analytics/TimeifyLineChart"), {ssr: false})
 
