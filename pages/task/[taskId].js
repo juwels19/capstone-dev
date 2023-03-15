@@ -542,7 +542,9 @@ export default function TaskDetails(props) {
                     </Card>
                 }
             </Flex>
-            <Heading as="h2" size="lg" mt="2%">Post Task Reflection</Heading>
+            {task.completed && 
+                <Heading as="h2" size="lg" mt="2%">Post Task Reflection</Heading>
+            }
             {(task.completed && estimationDifferenceColor === "") &&
                 <Flex>
                     <Text mt="1%" fontSize="lg" as="b">Why do you think your prediction was correct for this task?</Text>    
