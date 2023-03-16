@@ -15,7 +15,7 @@ export default function MobileScreen() {
                         The Timeify mobile experience is currently under construction 👷‍♂️👷‍♀️🚧.
                       </Text>
                       <Text align="center" as="b" mb="5%">
-                        Please access this website on a larger device!
+                        Try turning your device to landscape or access this website on a larger device.
                       </Text>
                     </VStack>
                   </CardFooter>

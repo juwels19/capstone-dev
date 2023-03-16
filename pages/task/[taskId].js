@@ -241,8 +241,8 @@ export default function TaskDetails(props) {
             13: "12-"
         }
 
-        const lowerBound = parseInt(effortValueToBounds[task.effortRating].split("-")[0]) * 3600;
-        const upperBound = parseInt(effortValueToBounds[task.effortRating].split("-")[1]) * 3600;
+        const lowerBound = parseFloat(effortValueToBounds[task.effortRating].split("-")[0]) * 3600;
+        const upperBound = parseFloat(effortValueToBounds[task.effortRating].split("-")[1]) * 3600;
 
         var totalDuration = 0;
         for (const session of sessions) {

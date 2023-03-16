@@ -15,10 +15,10 @@ function MyApp({ Component, pageProps }) {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         {/* <BugReportHeader/> */}
-        <Show breakpoint='(max-width: 1179px)'>
+        <Show breakpoint='(max-width: 1280px)'>
           <MobileScreen/>
         </Show>
-        <Show breakpoint='(min-width: 1179px)'>
+        <Show breakpoint='(min-width: 1280px)'>
           <Component {...pageProps} />
         </Show>
       </ChakraProvider>

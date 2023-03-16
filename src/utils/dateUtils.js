@@ -55,5 +55,5 @@ export const setDateToMonday = ( date ) => {
 
 
 export const isDueDateClose = (date) => {
-    return moment(moment().format()).isBetween(moment(date).subtract(2, "days"), date)
+    return moment(moment().format()).isBetween(moment(date).subtract(2, "days"), date) || moment(moment().format()).isSameOrAfter(date)
 }
