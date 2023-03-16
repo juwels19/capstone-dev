@@ -9,6 +9,9 @@
     "lint": "next lint",
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.17",
     "@chakra-ui/react": "^2.4.9",
