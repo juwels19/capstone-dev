@@ -10,7 +10,7 @@
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.17",
