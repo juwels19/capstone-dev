@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs")
 const prisma = new PrismaClient()
 
 async function main() {
-    const USERS = ['Grace', 'Lamar', 'Alexander', 'Thomas', 'Andres']
+    const USERS = ['Grace', 'Lamar', 'Alexander', 'Tom', 'Andre']
 
     const DATA = await Promise.all(USERS.map(async (name) => {
         return  {

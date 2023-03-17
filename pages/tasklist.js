@@ -535,7 +535,7 @@ export default function Tasklist(props) {
                             columns={COLUMNS} 
                             data={completedTasks}
                             defaultSortColumnId="dueDate"
-                            defaultSortColumnDesc={false}
+                            defaultSortColumnDesc={true}
                             // onChangeSortOrder={ (sortOrder) => tableOnChangeSortOrder(completedTasks, setCompletedTasks, sortOrder)}
                         />
                     )}
